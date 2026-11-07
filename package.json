@@ -1,0 +1,16 @@
+{
+  "name": "salle-comble",
+  "private": true,
+  "type": "module",
+  "description": "Simulateur 3D : scaler une billetterie web, du laptop au multi-région.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "serve": "python3 -m http.server 4173 --directory dist",
+    "test": "playwright test",
+    "ci": "npm run build && npm run check && npm test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.48.2"
+  }
+}

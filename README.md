@@ -1,6 +1,8 @@
 # Salle Comble · Monter une infra qui tient la charge
 
-Simulateur 3D interactif (en français) : comment faire évoluer la billetterie d'une salle de concert en 18 étapes, du laptop du développeur jusqu'à Kubernetes.
+[![CI](https://github.com/Gptimus/salle-comble/actions/workflows/ci.yml/badge.svg)](https://github.com/Gptimus/salle-comble/actions/workflows/ci.yml)
+
+Simulateur 3D interactif (en français) : comment faire évoluer la billetterie d'une salle de concert en 18 étapes, du laptop du développeur jusqu'au multi-région.
 
 **Site : https://gptimus.github.io/salle-comble/**
 
@@ -31,9 +33,35 @@ Simulateur 3D interactif (en français) : comment faire évoluer la billetterie 
 - Moteur de files d'attente : latence médiane et p99, taux d'erreur, historique sur une minute.
 - Scénarios : manuel, ouverture des ventes (×30 en 2 s), journée type.
 - Pannes : serveur applicatif, load balancer, base lente, expiration du cache, fournisseur SMS, pod ou nœud Kubernetes, service lent, région entière.
-- Pic de réservations : la queue se remplit puis se vide.
-- Déploiement d'une version buguée : rolling update contre canary.
 
-Les capacités, latences et prix affichés sont des ordres de grandeur issus d'un modèle simplifié.
+Les capacités, latences et prix affichés sont des ordres de grandeur issus d'un modèle simplifié. Les durées (démarrage d'un pod, fenêtres d'alerte) sont raccourcies.
 
-Fichier unique : `index.html` (three.js chargé depuis jsDelivr).
+## Développer
+
+La page est un seul fichier, `src/index.html` (three.js chargé depuis jsDelivr, version figée, avec Subresource Integrity).
+
+```bash
+npm ci
+npx playwright install chromium   # une fois
+npm run build                     # src/ → dist/, génère robots.txt et sitemap.xml
+npm run check                     # contrôles statiques
+npm test                          # tests navigateur (Playwright, ordinateur et mobile)
+npm run serve                     # http://localhost:4173
+```
+
+| Fichier | Rôle |
+| --- | --- |
+| `src/index.html` | La page : HTML, CSS, simulation et scène 3D |
+| `src/og.png` | Image de partage (1200 × 630) |
+| `scripts/build.mjs` | Copie `src/` dans `dist/`, ajoute le numéro de build, génère `robots.txt` et `sitemap.xml` |
+| `scripts/check.mjs` | Syntaxe du script, SRI et versions figées, numérotation des étapes, ancres, ids, balises SEO |
+| `tests/` | Chaque étape se charge sans erreur ; chaque leçon se rejoue (queue, pod recréé, canary, disjoncteur, bascule de région, alerte) |
+
+## Intégration et déploiement
+
+`.github/workflows/ci.yml` :
+
+- **Chaque pull request** : build, contrôles statiques, tests Playwright. Le rapport est joint en cas d'échec.
+- **Chaque push sur `main`** : la même chose, puis déploiement sur GitHub Pages, puis vérification que le site en ligne sert bien ce build.
+
+Dependabot propose chaque mois les mises à jour des actions GitHub et de Playwright.
