@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Billetterie : scaler une infra web en 13 étapes | Salle Comble</title>
-<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues et notifications. Pics, pannes, latence et erreurs en direct.">
+<title>Billetterie : scaler une infra web en 15 étapes | Salle Comble</title>
+<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues, notifications et Kubernetes. Pics, pannes, déploiements en direct.">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Gptimus">
 <meta name="theme-color" content="#111214">
@@ -19,12 +19,12 @@
 <meta property="og:image" content="https://gptimus.github.io/salle-comble/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Couverture de la notice : Monter une infra qui tient la charge, en 8 étapes.">
+<meta property="og:image:alt" content="Couverture de la notice : Monter une infra qui tient la charge, en 15 étapes.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Monter une infra qui tient la charge · Salle Comble">
 <meta name="twitter:description" content="Lance l'ouverture des ventes, coupe un serveur, regarde ce qui casse et ajoute la pièce qui manque. Un simulateur 3D du scaling d'une infrastructure web.">
 <meta name="twitter:image" content="https://gptimus.github.io/salle-comble/og.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 13 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues et notifications. Pics, pannes, latence et erreurs en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting", "Queues et workers", "Dead letter queue", "Notifications fan-out", "Idempotence"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 15 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues, notifications et Kubernetes. Pics, pannes, déploiements en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting", "Queues et workers", "Dead letter queue", "Notifications fan-out", "Idempotence", "Kubernetes", "Horizontal Pod Autoscaler", "KEDA", "Cluster autoscaler", "Auto-réparation", "Rolling update", "Canary"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
@@ -89,7 +89,7 @@ svg.ico { width: 1em; height: 1em; flex: none; }
 .inv-note { display: flex; gap: 10px; align-items: center; padding: 12px 16px; font-size: 14px; }
 .inv-note .mk { color: var(--red); }
 
-.stepnav { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
+.stepnav { display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
 .stepnav button { border: 0; border-right: 1px solid var(--hatch); background: transparent; text-align: left; padding: 8px 10px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0; transition: background-color .2s; }
 .stepnav button:last-child { border-right: 0; }
 .stepnav button b { font-family: var(--font-cond); font-stretch: 62%; font-weight: 850; font-size: 30px; line-height: 1; }
@@ -264,7 +264,7 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 @media (max-width: 1100px) {
   .cover-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .stepnav { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .stepnav { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   .stepnav button:nth-child(7) { border-right: 0; }
   .stepnav button:nth-child(-n+7) { border-bottom: 1px solid var(--hatch); }
 }
@@ -336,6 +336,8 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
     <symbol id="p-gw" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M16 44 32 36 48 44 32 52z"/><path d="M16 44v6l16 8v-6z"/><path d="M32 52v6l16-8v-6z"/></g><g fill="none" stroke="#111214" stroke-width="3" stroke-linecap="round"><path d="M32 44V20"/><path d="M32 22 14 18M32 22l16-7M32 22l5 13"/></g><circle cx="32" cy="20" r="2.5" fill="#1E4FD8"/></symbol>
     <symbol id="p-queue" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M4 38 36 22 60 34 28 50z"/><path d="M4 38v4l24 12v-4zM28 50v4l32-16v-4z"/></g><g fill="#E3EAFB" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M14 33l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/><path d="M26 27l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/><path d="M38 21l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/></g><path d="M50 17l6 3" stroke="#1E4FD8" stroke-width="2.5" stroke-linecap="round"/></symbol>
     <symbol id="p-bell" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M20 42V30a12 12 0 0 1 24 0v12l4 5H16z"/><path d="M28 51a4 4 0 0 0 8 0"/></g><path d="M32 14v4" stroke="#111214" stroke-width="2" stroke-linecap="round"/><g fill="none" stroke="#1E4FD8" stroke-width="2" stroke-linecap="round"><path d="M48 22c3 3 4 7 3 11"/><path d="M16 22c-3 3-4 7-3 11"/></g></symbol>
+    <symbol id="p-pod" viewBox="0 0 64 64"><g stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M32 10 52 20 32 30 12 20z" fill="#E3EAFB"/><path d="M12 20v22l20 10V30z" fill="#fff"/><path d="M52 20v22L32 52V30z" fill="#E3EAFB"/></g><path d="M17 34l8 4" stroke="#1E4FD8" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="p-node" viewBox="0 0 64 64"><g stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M4 40 32 26 60 40 32 54z" fill="#fff"/><path d="M4 40v4l28 14v-4zM32 54v4l28-14v-4z" fill="#fff"/><path d="M18 30l7-3.5 7 3.5v7l-7 3.5-7-3.5z" fill="#E3EAFB"/><path d="M32 37l7-3.5 7 3.5v7l-7 3.5-7-3.5z" fill="#E3EAFB"/></g></symbol>
     <symbol id="m-ok" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M6.8 11.4 9.7 14.2 15.4 8.2"/></symbol>
     <symbol id="m-warn" viewBox="0 0 22 22"><path d="M11 2.5 20 18.5H2z"/><path d="M11 8.5v4.5M11 15.6v.4"/></symbol>
     <symbol id="m-bad" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M7.5 7.5l7 7M14.5 7.5l-7 7"/></symbol>
@@ -345,11 +347,11 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 <header class="cover gutter">
   <div class="wrap">
-    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-13 · FR</span></div>
+    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-15 · FR</span></div>
     <div class="cover-grid">
       <div>
         <h1>Monter une infra <span class="hl">qui tient</span> la charge</h1>
-        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Treize étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
+        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Quinze étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
         <div class="dodont">
           <div class="dd bad">
             <svg class="scene" viewBox="0 0 240 96" aria-hidden="true"><g><use href="#p-users" x="4" y="16" width="64" height="64"/><use href="#p-users" x="30" y="24" width="56" height="56"/></g><path d="M86 52h62" stroke="#111214" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/><use href="#p-server" x="148" y="14" width="72" height="72"/><g stroke="#D7261B" stroke-width="3" stroke-linecap="round"><path d="M200 18l18 18M218 18l-18 18"/></g></svg>
@@ -362,13 +364,14 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
         </div>
       </div>
       <aside class="inventory" aria-label="Contenu de l'infrastructure finale">
-        <h2>Contenu <span>étape 13</span></h2>
+        <h2>Contenu <span>étape 15</span></h2>
         <ul class="inv">
           <li><svg><use href="#p-dns"/></svg><div><div class="q">1×</div><div class="n">DNS multi-IP</div></div></li>
           <li><svg><use href="#p-cdn"/></svg><div><div class="q">1×</div><div class="n">CDN (fichiers)</div></div></li>
           <li><svg><use href="#p-lb"/></svg><div><div class="q">3×</div><div class="n">Load balancer</div></div></li>
           <li><svg><use href="#p-gw"/></svg><div><div class="q">1×</div><div class="n">Passerelle · rate limit</div></div></li>
-          <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Serveur applicatif</div></div></li>
+          <li><svg><use href="#p-node"/></svg><div><div class="q">2 à 6</div><div class="n">Nœuds Kubernetes</div></div></li>
+          <li><svg><use href="#p-pod"/></svg><div><div class="q">2 à 24</div><div class="n">Pods applicatifs (HPA)</div></div></li>
           <li><svg><use href="#p-cache"/></svg><div><div class="q">1×</div><div class="n">Cache Redis</div></div></li>
           <li><svg><use href="#p-queue"/></svg><div><div class="q">4×</div><div class="n">Queue (réservations, email, SMS, push)</div></div></li>
           <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Worker</div></div></li>
@@ -610,6 +613,61 @@ HTTP/1.1 202 Accepted
       <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="12">–</b></p>
     </section>
 
+    <section class="step" id="etape-14" data-step="13">
+      <div class="head"><span class="big" aria-hidden="true">14</span><div><h2>Kubernetes&nbsp;: des pods qui suivent la charge</h2><div class="parts"><span class="part"><svg><use href="#p-node"/></svg>2 à 6 nœuds</span><span class="part"><svg><use href="#p-pod"/></svg>2 à 24 pods</span></div></div></div>
+      <p class="lead">Jusqu'ici, ajouter un serveur voulait dire en commander un, l'installer et le brancher au load balancer. Avec Kubernetes, l'application tourne dans des conteneurs regroupés en pods, posés sur des machines appelées nœuds. On déclare combien de pods on veut&nbsp;; Kubernetes les place, les surveille et les remplace.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Avec un nombre fixe de pods, on paie le pic toute la nuit, ou on sature le soir. Lance «&nbsp;Journée type&nbsp;» avec 8 pods fixes&nbsp;: à 20&nbsp;h, les pods passent 90&nbsp;%, et à 4&nbsp;h ils tournent presque à vide.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · autoscaling</b><p>Le Horizontal Pod Autoscaler (HPA) mesure le CPU et ajuste le nombre de pods pour viser 70&nbsp;%. Quand les nœuds sont pleins, les nouveaux pods restent en attente (Pending) et le cluster autoscaler loue une machine de plus. KEDA fait la même chose pour les workers, à partir de la longueur de la queue.</p></div></div>
+      </div>
+      <pre class="term"><span class="pr">&gt;</span> kubectl get hpa
+NAME      REFERENCE        TARGETS   MIN   MAX   REPLICAS
+billets   Deployment/app   68%/70%   2     20    11</pre>
+      <div class="tags"><span class="tag">Kubernetes</span><span class="tag">HPA</span><span class="tag">KEDA</span><span class="tag">Cluster Autoscaler</span><span class="tag">Karpenter</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Règle le cluster</div><div class="ctl-b">
+        <div class="seg" data-step="13" data-key="hpa" role="group" aria-label="Nombre de pods">
+          <button type="button" data-val="off">Pods fixes</button><button type="button" data-val="on">Autoscaling HPA</button>
+        </div>
+        <p class="hint" id="hpaHint"></p>
+        <div class="ctl-row"><label for="r-pods-13">Pods fixes</label><input type="range" id="r-pods-13" min="1" max="24" step="1" data-step="13" data-key="pods"><output data-out="13-pods"></output></div>
+        <div class="ctl-row"><label for="r-max-13">Maximum du HPA</label><input type="range" id="r-max-13" min="4" max="24" step="1" data-step="13" data-key="maxPods"><output data-out="13-maxPods"></output></div>
+        <div class="ctl-row"><button class="btn" id="killPodBtn" type="button">Tuer un pod</button><button class="btn" id="killNodeBtn" type="button">Tuer un nœud</button></div>
+        <p class="hint" id="healHint" aria-live="polite"></p>
+      </div></div>
+      <div class="pnl">
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Auto-réparation</b><p>Un pod qui plante est recréé en quelques secondes. Un nœud qui tombe emporte ses pods&nbsp;: Kubernetes les replace ailleurs, et démarre une machine s'il manque de place. Deux sondes décident de l'état d'un pod&nbsp;: liveness (vivant, sinon on le redémarre) et readiness (prêt à recevoir du trafic).</p></div></div>
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Limite</b><p>Un pod démarre en secondes, une machine en minutes (ici accélérés). À l'ouverture des ventes, la charge est multipliée par 30 en 2 secondes&nbsp;: l'autoscaling arrive trop tard. On monte le minimum de pods avant l'heure (pré-scaling) et on garde la salle d'attente virtuelle.</p></div></div>
+      </div>
+      <p class="cap">Charge maximale de ce montage (pods fixes, ou maximum du HPA)&nbsp;: <b data-cap="13">–</b></p>
+    </section>
+
+    <section class="step" id="etape-15" data-step="14">
+      <div class="head"><span class="big" aria-hidden="true">15</span><div><h2>Déployer une version sans couper</h2><div class="parts"><span class="part"><svg><use href="#p-pod"/></svg>8× Pod</span><span class="part"><svg><use href="#p-node"/></svg>1× Deployment</span></div></div></div>
+      <p class="lead">La billetterie change souvent&nbsp;: un nouveau plan de salle, un correctif sur le paiement. Chaque mise en production remplace les pods par ceux de la nouvelle version. Toute la question est l'ordre dans lequel on le fait.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Recreate arrête tous les pods, puis démarre les nouveaux. Pendant le démarrage, plus personne ne répond. Clique sur «&nbsp;Déployer v2&nbsp;»&nbsp;: le site passe hors ligne quelques secondes.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · rolling update</b><p>Kubernetes démarre quelques nouveaux pods, attend que la readiness probe les déclare prêts, puis arrête autant d'anciens. La capacité ne baisse jamais. Les nouveaux pods sont en bleu.</p></div></div>
+      </div>
+      <pre class="term"><span class="pr">&gt;</span> kubectl rollout status deployment/app
+Waiting for rollout to finish: 4 of 8 updated replicas are available...
+deployment "app" successfully rolled out</pre>
+      <div class="tags"><span class="tag">Rolling update</span><span class="tag">Argo Rollouts</span><span class="tag">Flagger</span><span class="tag">Helm</span><span class="tag">GitOps</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Déploie la version suivante</div><div class="ctl-b">
+        <div class="seg" data-step="14" data-key="strategy" role="group" aria-label="Stratégie de déploiement">
+          <button type="button" data-val="recreate">Recreate</button><button type="button" data-val="rolling">Rolling update</button><button type="button" data-val="canary">Canary 10 %</button>
+        </div>
+        <p class="hint" id="stratHint"></p>
+        <div class="ctl-row"><button class="btn" id="deployBtn" type="button">Déployer v2</button><button class="btn" id="bugBtn" type="button" aria-pressed="false">Glisser un bug dans la nouvelle version</button></div>
+        <p class="hint" id="depHint" aria-live="polite"></p>
+        <div class="ctl-row"><label for="r-pods-14">Pods</label><input type="range" id="r-pods-14" min="2" max="12" step="1" data-step="14" data-key="pods"><output data-out="14-pods"></output></div>
+      </div></div>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Un bug passe les sondes</b><p>Le nouveau pod démarre et répond à /health, mais 30&nbsp;% des paiements échouent. Le rolling update le déploie partout, sans rien voir. Glisse le bug et compare avec Canary.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Canary et retour automatique</b><p>La nouvelle version reçoit d'abord 10&nbsp;% du trafic. Si son taux d'erreur dépasse un seuil pendant l'observation, l'outil revient à l'ancienne version tout seul&nbsp;: seuls 10&nbsp;% des fans voient le bug, quelques secondes.</p></div></div>
+      </div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="14">–</b></p>
+    </section>
+
   </main>
 
   <aside class="stage" id="stage" aria-label="Planche 3D de l'infrastructure">
@@ -683,6 +741,11 @@ HTTP/1.1 202 Accepted
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Des paiements en échec disparaissent</span></td><td>Aucun retry, aucune trace</td><td>Retries avec backoff, puis dead letter queue</td><td><a class="go" href="#etape-12" data-go="11">→ 12</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Le billet par email arrive en retard à cause des SMS</span></td><td>Une seule queue pour tous les canaux</td><td>Fan-out&nbsp;: une queue et des workers par canal</td><td><a class="go" href="#etape-13" data-go="12">→ 13</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Un fan reçoit deux fois son billet</span></td><td>Message relivré après un crash du worker</td><td>Clé d'idempotence par réservation et par canal</td><td><a class="go" href="#etape-13" data-go="12">→ 13</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Serveurs saturés le soir, presque vides la nuit</span></td><td>Nombre de serveurs fixe</td><td>HPA&nbsp;: le nombre de pods suit le CPU, cible 70&nbsp;%</td><td><a class="go" href="#etape-14" data-go="13">→ 14</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Pods en attente (Pending) pendant un pic</span></td><td>Plus de place sur les nœuds</td><td>Cluster autoscaler, nœuds de réserve, pré-scaling avant l'heure</td><td><a class="go" href="#etape-14" data-go="13">→ 14</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Un serveur plante et reste planté</span></td><td>Pas de redémarrage automatique</td><td>Deployment Kubernetes avec sondes liveness et readiness</td><td><a class="go" href="#etape-14" data-go="13">→ 14</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Site coupé à chaque mise en production</span></td><td>Déploiement Recreate</td><td>Rolling update avec readiness probe</td><td><a class="go" href="#etape-15" data-go="14">→ 15</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Une version buguée touche tous les fans</span></td><td>Déploiement sans analyse</td><td>Canary avec retour automatique (Argo Rollouts, Flagger)</td><td><a class="go" href="#etape-15" data-go="14">→ 15</a></td></tr>
           </tbody>
         </table>
       </div>
@@ -722,7 +785,7 @@ HTTP/1.1 202 Accepted
         <div class="ex"><svg><use href="#p-bell"/></svg><span class="q">3×</span><span class="n">Email, SMS, push</span></div>
       </div>
     </div>
-    <div class="endmark"><span>Salle Comble · INFRA-13</span><span>Fin de la notice</span></div>
+    <div class="endmark"><span>Salle Comble · INFRA-15</span><span>Fin de la notice</span></div>
   </div>
 </section>
 
@@ -752,6 +815,12 @@ const isAsync = id => ASYNC_KINDS.has(id.replace(/\d+$/, ''));
 const CHN = { mail: 'Email', sms: 'SMS', push: 'Push' };
 const QS = { main: 0, dlq: 0, rate: 0, wait: 0, cq: { mail: 0, sms: 0, push: 0 }, cw: { mail: 0, sms: 0, push: 0 }, shared: 0 };
 let ASYNC_IN = null;
+/* Kubernetes : un pod = une copie de l'application (5 000 fans). Un nœud = une machine qui accueille 4 pods.
+   Durées raccourcies pour la démo : un pod démarre en 4 s, une machine en 10 s, le HPA décide toutes les 2 s. */
+const PER_NODE = 4, MAX_NODES = 6, POD_START = 4, NODE_START = 10, NODE_IDLE = 6, HPA_EVERY = 2, HPA_DOWN = 10, HPA_MIN = 2, HPA_TARGET = 0.7;
+const CANARY = 0.1, CANARY_T = 8, BUG_ERR = 0.3;
+const K8S = { pods: [], nodes: [], uid: 0, nuid: 0, ver: 0, D: 0, hpaT: 0, downT: 0, cur: 1, dep: null, msg: '', msgT: 0, bad: new Set(), avgN: 0 };
+const isK8s = k => k >= 13;
 function resetQueues() { QS.main = QS.dlq = QS.rate = QS.wait = QS.shared = 0; for (const c in QS.cq) { QS.cq[c] = 0; QS.cw[c] = 0; } }
 const CORES = {
   8:  { cap: 500,  price: 200,  ram: '32 Go' },
@@ -773,6 +842,8 @@ const STEPS = [
   { short: 'Rate limit',   title: 'Rate limiting',               u: 50000 },
   { short: 'Queue',        title: 'Queue pour les réservations', u: 50000 },
   { short: 'Notifications',title: 'Notifications par canal',     u: 50000 },
+  { short: 'Kubernetes',   title: 'Pods et autoscaling',         u: 50000 },
+  { short: 'Déploiement',  title: 'Déployer sans couper',        u: 50000 },
 ];
 const DEFAULTS = [
   { closed: false }, {}, { cores: 32 }, {},
@@ -784,6 +855,8 @@ const DEFAULTS = [
   { apps: 8, replicas: 4, write: 5, cdn: 90, hit: 90, bots: 8, limit: 'none' },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'sync', workers: 8, fail: 2 },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, sms: 500, fan: 'shared', smsDown: false },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, hpa: 'off', pods: 8, maxPods: 20 },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 8, strategy: 'recreate', bug: false },
 ];
 const CHART = [
   { closed: false }, {}, { cores: 64 }, {},
@@ -795,6 +868,8 @@ const CHART = [
   { apps: 32, replicas: 6, write: 5, cdn: 95, hit: 95, bots: 8, limit: '20' },
   { apps: 32, replicas: 6, write: 60, cdn: 95, hit: 95, bots: 8, limit: '20', mode: 'queue', workers: 9, fail: 2 },
   { apps: 32, replicas: 6, write: 20, cdn: 95, hit: 95, bots: 8, limit: '20', mode: 'queue', workers: 9, fail: 2, sms: 3000, fan: 'split', smsDown: false },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, hpa: 'on', pods: 8, maxPods: 24 },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 8, strategy: 'canary', bug: false },
 ];
 const SS = DEFAULTS.map(o => ({ ...o }));
 const LBN = 3;
@@ -804,15 +879,33 @@ const LBN = 3;
 const NOCH = { app: false, lb: false, db: false, warm: 1, qBusy: false, peak: 0 };
 const CH = { app: false, lb: false, db: false, warm: 1, peak: 0 };
 const CH_FROM = { app: 1, lb: 4, db: 3 };
-let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0;
+let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0, BUG = 0;
 function loadsFor(k, s, u, ch = NOCH, out = null) {
-  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0, asyncIn = null;
+  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0, asyncIn = null, bug = 0;
   const dbc = i => (ch.db && i === 0 ? CAP.db / 3 : CAP.db);
   const apps = (n, uu = u) => {
     if (ch.app && n === 1) { m.app0 = Infinity; return; }
     if (ch.app) down.add('app0');
     const live = ch.app ? n - 1 : n;
     for (let i = ch.app ? 1 : 0; i < n; i++) m['app' + i] = uu / live / CAP.app;
+  };
+  /* Pods prêts seulement. Pour le calcul de capacité (ch = NOCH), on prend la configuration : pods fixes, ou le maximum du HPA. */
+  const pods = uu => {
+    const live = ch !== NOCH;
+    let r;
+    if (live) {
+      r = K8S.pods.filter(p => p.st === 'ready');
+      for (const p of K8S.pods) if (p.st !== 'ready') down.add(p.id);
+      for (const n of K8S.nodes) if (n.st !== 'ready') down.add(n.id);
+    } else r = Array.from({ length: k === 13 && s.hpa === 'on' ? s.maxPods : s.pods }, (_, i) => ({ id: 'app' + i, v: 1 }));
+    if (!r.length) { m[K8S.pods.length ? K8S.pods[0].id : 'app0'] = Infinity; return; }
+    const d = live && K8S.dep && K8S.dep.phase === 'canary' ? K8S.dep.to : 0;
+    const nc = d ? r.filter(p => p.v === d).length : 0, no = r.length - nc;
+    for (const p of r) {
+      const sh = nc && no ? (p.v === d ? CANARY / nc : (1 - CANARY) / no) : 1 / r.length;
+      m[p.id] = uu * sh / CAP.app;
+      if (live && K8S.bad.has(p.v)) bug += sh * BUG_ERR;
+    }
   };
   const lbs = (uu = u) => {
     if (ch.lb) { down.add('lb0'); lost = 1 / LBN; }
@@ -837,7 +930,7 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
     case 5: lbs(); apps(s.apps); m.db0 = u / dbc(0); break;
     case 6: lbs(); apps(s.apps);
       for (let i = 0; i < s.shards; i++) m['db' + i] = s.mode === 'copies' ? u / dbc(i) : u / s.shards / dbc(i); break;
-    case 7: case 8: case 9: case 10: case 11: case 12: {
+    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: {
       const w = (k >= 11 && ch.peak > 0 ? Math.min(90, s.write * 3) : s.write) / 100, R = s.replicas;
       const h = k >= 8 ? s.cdn / 100 : 0, f = 1 - STATIC * h;
       const hc = k >= 9 ? s.hit / 100 * ch.warm : 0;
@@ -848,7 +941,7 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
         uIn = u * (1 + s.bots); uOut = u * (1 - fp) + u * s.bots * L.pass;
         m.gw0 = uIn * f / CAP.gw;
       }
-      lbs(uIn * f); apps(s.apps, uOut * f);
+      lbs(uIn * f); if (isK8s(k)) pods(uOut * f); else apps(s.apps, uOut * f);
       if (k >= 8) m.cdn0 = uIn * STATIC * h / CAP.cdn;
       if (k >= 9) m.cache0 = (1 - w) * uOut / CAP.cache;
       if (k >= 11 && s.mode === 'queue') {
@@ -868,7 +961,7 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
       break;
     }
   }
-  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; out.async = asyncIn; }
+  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; out.async = asyncIn; out.bug = bug; }
   return m;
 }
 const maxOf = m => { let best = 0, id = null; for (const k in m) { if (isAsync(k)) continue; if (m[k] > best || id === null) { best = m[k]; id = k; } } return { load: best, id }; };
@@ -882,7 +975,7 @@ function niceCap(c) { if (c <= 0) return 'hors ligne'; const p = Math.pow(10, Ma
 function neckNameFor(k, id) {
   if (!id) return '';
   if (id === 'laptop') return 'Laptop';
-  if (id.startsWith('app')) return k <= 2 ? 'Serveur' : 'Serveurs applicatifs';
+  if (id.startsWith('app')) return k >= 13 ? 'Pods' : k <= 2 ? 'Serveur' : 'Serveurs applicatifs';
   if (id.startsWith('lb')) return 'Load balancer';
   if (id.startsWith('rep')) return 'Réplicas';
   if (id === 'cdn0') return 'CDN';
@@ -904,6 +997,16 @@ function appPos(N, x0) {
 function colZ(n, sp) { const a = []; for (let i = 0; i < n; i++) a.push((i - (n - 1) / 2) * sp); return a; }
 function shardRange(i, S) { const per = Math.round(1000 / S); const a = i * per + 1, b = i === S - 1 ? 1000 : (i + 1) * per; return 'fans ' + a + '–' + b; }
 
+/* Cluster : 2 colonnes de nœuds, 4 emplacements de pod par nœud. Un pod qui démarre est plus petit. */
+function k8sLayout(node) {
+  /* L'étiquette du cluster va sur le nœud de devant, pour ne pas passer sous celle de la passerelle. */
+  const KN = K8S.nodes.slice(0, MAX_NODES), rows = Math.ceil(KN.length / 2);
+  KN.forEach((n, i) => {
+    const x = -0.6 + (i % 2) * 1.8, z = (Math.floor(i / 2) - (rows - 1) / 2) * 1.9;
+    node(n.id, 'knode', [x, 0, z], 'Cluster', { hideLabel: i !== (rows - 1) * 2, scale: n.st === 'ready' ? 1 : 0.75 });
+    K8S.pods.filter(p => p.node === n.id).forEach((p, j) => node(p.id, p.v % 2 ? 'pod' : 'pod2', [x + (j % 2 ? 0.38 : -0.38), 0.12, z + (j < 2 ? -0.36 : 0.36)], '', { hideLabel: true, scale: p.st === 'ready' ? 1 : 0.55 }));
+  });
+}
 function layout(k) {
   const s = SS[k], N = [], E = [];
   const node = (id, type, pos, label, extra = {}) => N.push({ id, type, pos, label, ...extra });
@@ -916,7 +1019,9 @@ function layout(k) {
   if (k === 3) { node('app0', 'srv2', [-0.6, 0, 0], 'Serveur app'); node('db0', 'db', [3.2, 0, 0], 'Base'); edge('users', 'app0'); edge('app0', 'db0'); }
   if (k >= 4) {
     const NA = k >= 7 ? Math.min(s.apps, APPVIS) : s.apps, ax = k === 4 ? 0 : 0.3, P = appPos(NA, ax), group = NA > 4, gw = k >= 10;
-    for (let i = 0; i < NA; i++) {
+    const AT = isK8s(k) ? K8S.nodes.slice(0, MAX_NODES).map(n => n.id) : Array.from({ length: NA }, (_, j) => 'app' + j);
+    if (isK8s(k)) k8sLayout(node);
+    else for (let i = 0; i < NA; i++) {
       let lab = 'App ' + (i + 1);
       if (k === 4 && i === 1) lab = 'App 2 · lent';
       const slowShown = k === 4 && i === 1;
@@ -927,35 +1032,35 @@ function layout(k) {
       const z = colZ(LBN, 2.7);
       node('dns', 'dns', [-6.2, 2.8, -3.4], 'DNS · 3 IP');
       const lbx = gw ? -4.9 : -4.4;
-      for (let i = 0; i < LBN; i++) { node('lb' + i, 'lb', [lbx, 0, z[i]], 'LB ' + (i + 1), { hideLabel: i !== 0 }); edge('users', 'lb' + i); edge('dns', 'lb' + i, { dashed: true }); if (gw) edge('lb' + i, 'gw0'); else for (let j = 0; j < NA; j++) edge('lb' + i, 'app' + j, { faint: true }); }
-      if (gw) { node('gw0', 'gw', [-2.4, 0, 0], 'Passerelle · rate limit'); for (let j = 0; j < NA; j++) edge('gw0', 'app' + j, { faint: true }); }
+      for (let i = 0; i < LBN; i++) { node('lb' + i, 'lb', [lbx, 0, z[i]], 'LB ' + (i + 1), { hideLabel: i !== 0 }); edge('users', 'lb' + i); edge('dns', 'lb' + i, { dashed: true }); if (gw) edge('lb' + i, 'gw0'); else for (const a of AT) edge('lb' + i, a, { faint: true }); }
+      if (gw) { node('gw0', 'gw', [-2.4, 0, 0], 'Passerelle · rate limit'); for (const a of AT) edge('gw0', a, { faint: true }); }
       if (k >= 8) { node('cdn0', 'cdn', [-6.4, 0, 4.6], 'CDN'); edge('users', 'cdn0'); }
       edge('users', 'dns', { dashed: true });
     }
     const dbx = k >= 9 ? 5.9 : NA > 6 ? 4.4 : 4.2;
-    if (k >= 9) { node('cache0', 'cache', [3.2, 0, 0], 'Cache Redis'); for (let j = 0; j < NA; j++) edge('app' + j, 'cache0', { faint: true }); }
+    if (k >= 9) { node('cache0', 'cache', [3.2, 0, 0], 'Cache Redis'); for (const a of AT) edge(a, 'cache0', { faint: true }); }
     if (k <= 5) { node('db0', 'db', [dbx + 0.3, 0, 0], 'Base'); for (let i = 0; i < NA; i++) edge('app' + i, 'db0', { faint: NA > 4 }); }
     if (k === 6) {
       const S = s.shards, z = colZ(S, 2.1);
       for (let i = 0; i < S; i++) {
         const lab = s.mode === 'copies' ? 'Copie ' + (i + 1) : 'Shard ' + (i + 1) + ' · ' + shardRange(i, S);
         node('db' + i, 'db', [dbx + 0.6, 0, z[i]], lab);
-        for (let j = 0; j < NA; j++) edge('app' + j, 'db' + i, { faint: true });
+        for (const a of AT) edge(a, 'db' + i, { faint: true });
         if (s.mode === 'copies') for (let j = i + 1; j < S; j++) edge('db' + i, 'db' + j, { dashed: true, lift: 0.9 });
       }
     }
     if (k >= 11 && s.mode === 'queue') {
       node('q0', 'queue', [2.4, 0, 6.0], 'Queue');
       node('wk0', 'srv1', [5.4, 0, 6.0], 'Workers');
-      for (let j = 0; j < NA; j++) edge('app' + j, 'q0', { faint: true });
+      for (const a of AT) edge(a, 'q0', { faint: true });
       edge('q0', 'wk0'); edge('wk0', 'db0', { lift: 0.3 });
       if (k === 12) { const cz = [5.0, 6.8, 8.6]; Object.keys(CHN).forEach((c, i) => { node(c + '0', 'cq', [8.4, 0, cz[i]], CHN[c]); edge('wk0', c + '0', { faint: true }); }); }
     }
     if (k >= 7) {
       const R = s.replicas, z = colZ(R, 2.0);
       node('db0', 'dbm', [dbx, 0, 0], 'Primaire');
-      for (let i = 0; i < R; i++) { node('rep' + i, 'db', [dbx + 3.1, 0, z[i]], 'Réplica ' + (i + 1), { hideLabel: R > 4 && i !== 0 }); edge('db0', 'rep' + i, { dashed: true, lift: 0.4 }); if (k >= 9) edge('cache0', 'rep' + i, { faint: true, lift: 1.2 }); else for (let j = 0; j < NA; j++) edge('app' + j, 'rep' + i, { faint: true, lift: 2.2 }); }
-      for (let j = 0; j < NA; j++) edge('app' + j, 'db0', { faint: true });
+      for (let i = 0; i < R; i++) { node('rep' + i, 'db', [dbx + 3.1, 0, z[i]], 'Réplica ' + (i + 1), { hideLabel: R > 4 && i !== 0 }); edge('db0', 'rep' + i, { dashed: true, lift: 0.4 }); if (k >= 9) edge('cache0', 'rep' + i, { faint: true, lift: 1.2 }); else for (const a of AT) edge(a, 'rep' + i, { faint: true, lift: 2.2 }); }
+      for (const a of AT) edge(a, 'db0', { faint: true });
     }
   }
   return { nodes: N, edges: E };
@@ -1028,6 +1133,120 @@ function asyncStep(dt) {
     for (const c in caps) { QS.cq[c] = QS.shared / 3; QS.cw[c] = wt; }
   }
 }
+/* Contrôleurs Kubernetes, en très simplifié : HPA et KEDA, Deployment (versions), scheduler, cluster autoscaler. */
+function k8sReset(k) {
+  Object.assign(K8S, { pods: [], nodes: [], uid: 0, nuid: 0, hpaT: 0, downT: 0, cur: 1, dep: null, msg: '', msgT: 0 });
+  K8S.bad.clear();
+  if (isK8s(k)) {
+    const s = SS[k];
+    if (k === 13) s.workers = 8;
+    K8S.D = k === 13 && s.hpa === 'on' ? Math.max(HPA_MIN, Math.min(s.maxPods, s.pods)) : s.pods;
+    /* Étape 15 : une machine de réserve, pour que le rolling update ait de la place. */
+    const nn = Math.ceil(K8S.D / PER_NODE) + (k === 14 ? 1 : 0);
+    for (let i = 0; i < nn; i++) K8S.nodes.push({ id: 'kn' + K8S.nuid++, st: 'ready', t: 0, idle: 0 });
+    for (let i = 0; i < K8S.D; i++) K8S.pods.push({ id: 'app' + K8S.uid++, st: 'ready', t: 0, v: 1, node: K8S.nodes[Math.floor(i / PER_NODE)].id });
+    K8S.avgN = nn;
+  }
+  K8S.ver++;
+}
+const podsOn = id => { let c = 0; for (const p of K8S.pods) if (p.node === id) c++; return c; };
+const podName = p => 'billets-' + ((+p.id.slice(3) * 7919 + 1297) % 46656).toString(36).padStart(3, '0');
+function setMsg(m, t = 8) { K8S.msg = m; K8S.msgT = t; }
+function delPod(p) { const i = K8S.pods.indexOf(p); if (i >= 0) { K8S.pods.splice(i, 1); K8S.ver++; } }
+function killPod() {
+  const r = K8S.pods.filter(p => p.st === 'ready'); if (!r.length) return;
+  const p = r[randInt(r.length)]; delPod(p);
+  setMsg(`Pod ${podName(p)} arrêté. Le Deployment en demande ${K8S.D} : Kubernetes en recrée un.`);
+}
+function killNode() {
+  const ns = K8S.nodes.filter(n => n.st === 'ready'); if (!ns.length) return;
+  const n = ns.reduce((a, b) => podsOn(b.id) > podsOn(a.id) ? b : a), lost = K8S.pods.filter(p => p.node === n.id);
+  lost.forEach(delPod); K8S.nodes.splice(K8S.nodes.indexOf(n), 1); K8S.ver++;
+  setMsg(`Nœud perdu avec ${lost.length} pods. Kubernetes les replace sur la place libre, et démarre une machine s'il n'y en a pas.`, 12);
+}
+function startDeploy() {
+  if (K8S.dep || step !== 14) return;
+  const s = SS[14], to = K8S.cur + 1;
+  if (s.bug) K8S.bad.add(to); else K8S.bad.delete(to);
+  K8S.dep = { to, phase: s.strategy, t: 0 }; K8S.msg = '';
+}
+function k8sStep(dt, k) {
+  if (!isK8s(k)) return;
+  const s = SS[k], auto = k === 13 && s.hpa === 'on';
+  let ch = false;
+  if (K8S.msgT > 0 && (K8S.msgT -= dt) <= 0) K8S.msg = '';
+  if (!auto && !K8S.dep) K8S.D = s.pods;
+  if (k === 13 && !auto) s.workers = 8;
+  K8S.hpaT += dt;
+  if (auto && K8S.hpaT >= HPA_EVERY) {
+    K8S.hpaT = 0;
+    const r = K8S.pods.filter(p => p.st === 'ready');
+    let sum = 0; for (const p of r) { const L = loads[p.id]; sum += isFinite(L) ? Math.min(3, L || 0) : 3; }
+    const want = Math.max(HPA_MIN, Math.min(s.maxPods, Math.ceil(sum / HPA_TARGET - 1e-6)));
+    if (!r.length) K8S.downT = 0;
+    else if (want > K8S.D) { K8S.D = want; K8S.downT = 0; }
+    else if (want < K8S.D) { K8S.downT += HPA_EVERY; if (K8S.downT >= HPA_DOWN) { K8S.D = want; K8S.downT = 0; } }
+    else K8S.downT = 0;
+    if (ASYNC_IN) s.workers = Math.max(1, Math.min(10, Math.ceil((ASYNC_IN.arrival + QS.main / 10) / WRK / 0.8)));
+  }
+  if (auto) K8S.D = Math.max(HPA_MIN, Math.min(s.maxPods, K8S.D));
+  /* Deployment : combien de pods de chaque version. */
+  const D = K8S.D, dep = K8S.dep, want = {};
+  const cnt = (v, ready) => K8S.pods.filter(p => p.v === v && (!ready || p.st === 'ready')).length;
+  if (!dep) want[K8S.cur] = D;
+  else {
+    const from = K8S.cur, to = dep.to, r2 = cnt(to, true);
+    if (dep.phase === 'recreate') {
+      want[to] = D;
+      if (r2 >= D) { K8S.cur = to; K8S.dep = null; setMsg(`v${to} en ligne. Le site a été coupé le temps que les pods démarrent.` + (K8S.bad.has(to) ? ' Et le bug touche tous les fans.' : ''), Infinity); }
+    } else if (dep.phase === 'canary') {
+      want[from] = D; want[to] = 1;
+      if (r2 >= 1) {
+        dep.t += dt;
+        if (dep.t >= CANARY_T) {
+          if (K8S.bad.has(to)) { want[to] = 0; K8S.dep = null; setMsg(`Canary v${to} : 30 % d'erreurs mesurées, seuil 5 %. Retour automatique à v${from} : seuls 10 % des fans ont vu le bug, quelques secondes.`, Infinity); }
+          else dep.phase = 'rolling';
+        }
+      }
+    }
+    if (K8S.dep && K8S.dep.phase === 'rolling') {
+      const surge = Math.max(1, Math.ceil(D / 4));
+      want[from] = Math.max(0, D - r2); want[to] = Math.min(D, D + surge - want[from]);
+      if (r2 >= D && !cnt(from)) {
+        K8S.cur = to; K8S.dep = null;
+        setMsg(K8S.bad.has(to) ? `v${to} en ligne sur tous les pods, avec le bug : 30 % des paiements échouent. La readiness probe ne voit rien. Retire le bug et déploie v${to + 1}.` : `v${to} en ligne, sans coupure.`, Infinity);
+      }
+    }
+  }
+  const rank = p => (p.st === 'pending' ? 0 : p.st === 'start' ? 1 : 2) * 10 + (p.node ? podsOn(p.node) : 0);
+  for (const v in want) {
+    const mine = K8S.pods.filter(p => p.v === +v);
+    for (let i = mine.length; i < want[v]; i++) { K8S.pods.push({ id: 'app' + K8S.uid++, st: 'pending', t: 0, v: +v, node: null }); ch = true; }
+    if (mine.length > want[v]) { mine.sort((a, b) => rank(a) - rank(b)).slice(0, mine.length - want[v]).forEach(delPod); }
+  }
+  K8S.pods.filter(p => !(p.v in want)).forEach(delPod);
+  /* Machines qui démarrent, scheduler, pods qui démarrent. */
+  for (const n of K8S.nodes) if (n.st === 'start' && (n.t -= dt) <= 0) { n.st = 'ready'; ch = true; }
+  for (const p of K8S.pods) {
+    if (p.st === 'pending') {
+      let best = null, bc = -1;
+      for (const n of K8S.nodes) { if (n.st !== 'ready') continue; const c = podsOn(n.id); if (c < PER_NODE && c > bc) { best = n; bc = c; } }
+      if (best) { p.node = best.id; p.st = 'start'; p.t = POD_START; ch = true; }
+    } else if (p.st === 'start' && (p.t -= dt) <= 0) { p.st = 'ready'; ch = true; }
+  }
+  /* Cluster autoscaler : des pods en attente, on loue une machine. Une machine vide depuis 6 s, on la rend. */
+  const pend = K8S.pods.filter(p => p.st === 'pending').length, coming = K8S.nodes.filter(n => n.st === 'start').length * PER_NODE;
+  if (pend > coming) {
+    const add = Math.min(MAX_NODES - K8S.nodes.length, Math.ceil((pend - coming) / PER_NODE));
+    for (let i = 0; i < add; i++) { K8S.nodes.push({ id: 'kn' + K8S.nuid++, st: 'start', t: NODE_START, idle: 0 }); ch = true; }
+  }
+  for (const n of [...K8S.nodes]) {
+    if (n.st === 'ready' && !podsOn(n.id) && K8S.nodes.length > (k === 14 ? Math.ceil(K8S.D / PER_NODE) + 1 : 1)) { n.idle += dt; if (n.idle >= NODE_IDLE) { K8S.nodes.splice(K8S.nodes.indexOf(n), 1); ch = true; } }
+    else n.idle = 0;
+  }
+  K8S.avgN += (K8S.nodes.length - K8S.avgN) * Math.min(1, dt / 20);
+  if (ch) K8S.ver++;
+}
 function simStep(dt) {
   const q = SIM.q, drop = SIM.drop;
   for (const id in q) if (!(id in loads)) delete q[id];
@@ -1056,7 +1275,7 @@ function simStep(dt) {
     const t = tiers[kind] || (tiers[kind] = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit });
     t.n++; t.w += wt; t.ok += wt * (1 - d); t.lat += wt * lat; t.max = Math.max(t.max, lat);
   }
-  let ok = (1 - LOST) * (1 - FP), p50 = 0, p99 = 0;
+  let ok = (1 - LOST) * (1 - FP) * (1 - BUG), p50 = 0, p99 = 0;
   for (const k in tiers) {
     const t = tiers[k];
     if (t.explicit) { ok *= t.ok + (1 - t.w); p50 += t.lat; }
@@ -1076,7 +1295,7 @@ function computeLoads() {
   const out = {};
   CH.qBusy = QS.main > 1;
   loads = loadsFor(step, SS[step], U, CH, out);
-  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked; ASYNC_IN = out.async;
+  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked; ASYNC_IN = out.async; BUG = out.bug;
 }
 
 /* ---------- Three.js ---------- */
@@ -1277,7 +1496,24 @@ function mkQueue(len) {
   g.userData = { led, h: 0.3, cubes };
   return g;
 }
+function mkKNode() {
+  const g = new THREE.Group(), led = ledMat();
+  const plate = lined(box(1.6, 0.12, 1.6), M.body); plate.position.y = 0.06; g.add(plate);
+  const l = new THREE.Mesh(box(0.4, 0.05, 0.03), led); l.position.set(-0.5, 0.06, 0.815); g.add(l);
+  g.userData = { led, h: 0.62, anchorY: 0.12 };
+  return g;
+}
+function mkPod(mat) {
+  const g = new THREE.Group(), led = ledMat();
+  const b = lined(box(0.56, 0.5, 0.56), mat); b.position.y = 0.25; g.add(b);
+  const l = new THREE.Mesh(box(0.22, 0.05, 0.03), led); l.position.set(-0.1, 0.32, 0.295); g.add(l);
+  g.userData = { led, h: 0.5 };
+  return g;
+}
 function build(type) {
+  if (type === 'knode') return mkKNode();
+  if (type === 'pod') return mkPod(M.body);
+  if (type === 'pod2') return mkPod(M.lb);
   if (type === 'queue') return mkQueue(2.4);
   if (type === 'cq') return mkQueue(1.3);
   if (type === 'cdn') return mkCDN();
@@ -1313,7 +1549,7 @@ function applyLayout() {
       n.root.remove(n.mesh); disposeTree(n.mesh); if (n.mesh.userData.led) n.mesh.userData.led.dispose();
       n.mesh = build(spec.type); n.root.add(n.mesh); n.type = spec.type; n.scale = 0.6;
     }
-    n.target.set(...spec.pos); n.scaleT = 1; n.removing = false; n.spec = spec;
+    n.target.set(...spec.pos); n.scaleT = spec.scale || 1; n.removing = false; n.spec = spec;
   }
   for (const [id, n] of nodes) if (!seen.has(id)) { n.scaleT = 0; n.removing = true; }
   for (const e of edges) { scene.remove(e.line); e.line.geometry.dispose(); }
@@ -1322,7 +1558,7 @@ function applyLayout() {
     const line = new THREE.Line(geo, e.dashed ? M.edgeDash : e.faint ? M.edgeFaint : M.edge);
     scene.add(line); return { ...e, line };
   });
-  const key = L.nodes.map(n => n.id + n.pos.join(',')).join('|');
+  const key = L.nodes.filter(n => !isK8s(step) || !/^(app|kn)\d/.test(n.id)).map(n => n.id + n.pos.join(',')).join('|');
   if (key !== lastLayoutKey) { lastLayoutKey = key; frame(); }
 }
 
@@ -1384,6 +1620,13 @@ function kindColor(kind, fig) {
   return TOK.ink;
 }
 function pickApp(s, fig) {
+  if (isK8s(step)) {
+    const r = K8S.pods.filter(p => p.st === 'ready');
+    if (!r.length) return K8S.pods.length ? K8S.pods[0].id.slice(3) : 0;
+    const d = K8S.dep && K8S.dep.phase === 'canary' ? K8S.dep.to : 0;
+    if (d) { const c = r.filter(p => p.v === d), o = r.filter(p => p.v !== d); if (c.length && o.length) { const pool = Math.random() < CANARY ? c : o; return pool[randInt(pool.length)].id.slice(3); } }
+    return r[randInt(r.length)].id.slice(3);
+  }
   const N = step >= 7 ? Math.min(s.apps, APPVIS) : s.apps;
   const live = i => (DOWN.has('app' + i) && N > 1 ? (i + 1) % N : i);
   if (step !== 4) return live(randInt(N));
@@ -1410,7 +1653,7 @@ function makeRoute() {
       const write = Math.random() < 0.15, d = randInt(s.shards);
       return { hops: ['users', lb, app, 'db' + d], kind: write ? 'write' : 'read', fig, sync: write ? { from: 'db' + d, to: Array.from({ length: s.shards }, (_, i) => 'db' + i).filter(x => x !== 'db' + d) } : null };
     }
-    case 7: case 8: case 9: case 10: case 11: case 12: {
+    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: {
       const qm = step >= 11 && s.mode === 'queue';
       if (qm && QS.rate > 0) {
         const r = Math.random();
@@ -1427,6 +1670,7 @@ function makeRoute() {
         pre.push('gw0');
       }
       pre.push('app' + pickApp(s, fig));
+      if (isK8s(step)) { const pd = K8S.pods.find(p => p.id === pre[pre.length - 1]); if (pd && K8S.bad.has(pd.v) && Math.random() < BUG_ERR) return { hops: pre, kind: kind || 'req', fig, failAt: pd.id }; }
       if (Math.random() < s.write / 100) return qm ? { hops: [...pre, 'q0'], kind: kind || 'write', fig, block } : { hops: [...pre, 'db0'], kind: kind || 'write', fig, block, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
       const rep = 'rep' + randInt(s.replicas);
       if (step >= 9) {
@@ -1558,7 +1802,7 @@ function placeLabels() {
   const W = stageEl.clientWidth, H = stageEl.clientHeight, v = new THREE.Vector3(), narrow = W < 560;
   let focusId = topId;
   const tn = focusId && nodes.get(focusId);
-  if (tn && tn.spec && tn.spec.hideLabel) focusId = focusId.replace(/\d+$/, '0');
+  if (tn && tn.spec && tn.spec.hideLabel) focusId = isK8s(step) && /^app/.test(focusId) ? ([...nodes.values()].find(n => /^kn\d/.test(n.id) && n.spec && !n.spec.hideLabel) || {}).id : focusId.replace(/\d+$/, '0');
   for (const n of nodes.values()) {
     let show = !n.removing && !(n.spec && n.spec.hideLabel) && n.scale > 0.5;
     if (show && narrow && n.id !== 'users' && n.id !== focusId) show = false;
@@ -1588,6 +1832,13 @@ function updateLabelText() {
     let html;
     if (n.id === 'users') html = `<div class="tagbox"><span class="nm">Fans</span><span class="ld">${fmt(U)}</span></div>`;
     else if (isAsync(n.id)) html = asyncLabel(n.id);
+    else if (/^kn\d/.test(n.id)) {
+      const r = K8S.pods.filter(p => p.st === 'ready'); let L = r.length ? 0 : Infinity;
+      for (const p of r) L = Math.max(L, loads[p.id] || 0);
+      const vs = {}; for (const p of K8S.pods) vs[p.v] = (vs[p.v] || 0) + 1;
+      const vt = step === 14 ? ' · ' + Object.keys(vs).map(v => 'v' + v + ' ×' + vs[v]).join(' · ') : '';
+      html = `<div class="tagbox"><span class="nm">Pods ×${r.length}${vt}</span><span class="ld st-${stOf(L)}">${pct(L)}</span></div>`;
+    }
     else if (n.id === 'dns') html = `<div class="tagbox"><span class="nm">${n.spec.label}</span></div>`;
     else {
       let L = loads[n.id];
@@ -1623,7 +1874,7 @@ const mtr = { q: $('#qline'), p50: $('#mP50'), p99: $('#mP99'), err: $('#mErr'),
 const fmtMs = ms => ms >= TIMEOUT * 1000 - 1 ? '> 2 s' : ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 const fmtErr = e => e < 0.0005 ? '0 %' : e < 0.1 ? (e * 100).toFixed(1).replace('.', ',') + ' %' : Math.round(e * 100) + ' %';
 function updateU() { U = Math.max(1, Math.min(U_MAX, Ubase * scnMult(SCN.mode, SCN.t))); }
-let liveAcc = 0;
+let liveAcc = 0, k8sVer = -1;
 function advanceSim(dt) {
   if (CH.warm < 1) CH.warm = Math.min(1, CH.warm + dt / 15);
   if (CH.peak > 0) { CH.peak = Math.max(0, CH.peak - dt); if (!CH.peak) syncControls(); }
@@ -1631,9 +1882,13 @@ function advanceSim(dt) {
     SCN.t += dt;
     if (SCN.mode === 'rush' && SCN.t > RUSH_END) { SCN.mode = 'manual'; SCN.t = 0; syncSim(); }
   }
+  if (isK8s(step) && CH.app) { CH.app = false; killPod(); syncSim(); }
   updateU();
   computeLoads();
   asyncStep(dt);
+  /* Journée type : une heure dure 2 s. Le temps de Kubernetes (minutes) est accéléré d'autant pour rester crédible. */
+  k8sStep(SCN.mode === 'day' ? dt * 15 : dt, step);
+  if (K8S.ver !== k8sVer) { k8sVer = K8S.ver; if (gl) applyLayout(); computeLoads(); }
   simStep(dt);
   liveAcc += dt;
   if (liveAcc >= 0.25) { liveAcc = 0; liveUpdate(); }
@@ -1667,7 +1922,7 @@ function liveUpdate() {
   if (step === 0 && SS[0].closed) bn = 'Le laptop est fermé';
   else if (!isFinite(top.load)) bn = 'Hors service : ' + neckNameFor(step, top.id);
   else bn = 'Pièce la plus chargée : ' + neckNameFor(step, top.id) + ' · ' + pct(top.load);
-  if (DOWN.size) bn += ' · ' + [...DOWN].map(d => (d.startsWith('lb') ? 'LB 1' : 'App 1')).join(', ') + ' en panne';
+  if (DOWN.size && !isK8s(step)) bn += ' · ' + [...DOWN].map(d => (d.startsWith('lb') ? 'LB 1' : 'App 1')).join(', ') + ' en panne';
   hud.bneck.textContent = bn;
   mtr.p50.textContent = fmtMs(SIM.p50);
   mtr.p99.textContent = fmtMs(SIM.p99);
@@ -1676,7 +1931,13 @@ function liveUpdate() {
   mtr.scn.textContent = scnLabel();
   const qm = step >= 11 && SS[step].mode === 'queue';
   mtr.q.hidden = !qm;
-  if (qm) {
+  if (isK8s(step)) {
+    const c = { ready: 0, start: 0, pending: 0 }; for (const p of K8S.pods) c[p.st]++;
+    let t = `Pods <b>${c.ready}</b> prêts` + (c.start ? ` · <b>${c.start}</b> démarrent` : '') + (c.pending ? ` · <b>${c.pending}</b> en attente` : '') + ` · Nœuds <b>${K8S.nodes.length}</b>`;
+    if (step === 13) t += ` · moyenne <b>${K8S.avgN.toFixed(1).replace('.', ',')}</b>`;
+    if (mtr.q.dataset.h !== t) { mtr.q.innerHTML = t; mtr.q.dataset.h = t; }
+    k8sHints();
+  } else if (qm) {
     let t = step === 12
       ? Object.keys(CHN).map(c => `${CHN[c]} <b>${fmtWait(QS.cw[c])}</b>`).join(' · ')
       : `Queue <b>${fmt(QS.main)}</b> · attente <b>${fmtWait(QS.wait)}</b> · DLQ <b>${fmt(QS.dlq)}</b>`;
@@ -1691,6 +1952,24 @@ function liveUpdate() {
     if (usersInst) usersInst.count = usersHull.count = figCount;
     updateLabelText();
   }
+}
+function k8sHints() {
+  const s13 = SS[13], on13 = step === 13, on14 = step === 14;
+  $('#hpaHint').textContent = s13.hpa === 'on'
+    ? `HPA : vise 70 % de CPU par pod, entre ${HPA_MIN} et ${s13.maxPods} pods.` + (on13 ? ` Il en demande ${K8S.D}. KEDA règle les workers sur la queue : ${s13.workers}.` : '')
+    : `${s13.pods} pods fixes, quelle que soit l'heure. Lance « Journée type » et regarde 20 h, puis la nuit.`;
+  if (SCN.mode === 'day' && on13) $('#hpaHint').textContent += ' En « Journée type », une heure dure 2 s : démarrages accélérés d\'autant.';
+  $('#healHint').textContent = (on13 && K8S.msg) || 'Kubernetes compare sans arrêt les pods prêts au nombre demandé, et corrige l\'écart.';
+  const d = on14 ? K8S.dep : null;
+  let t;
+  if (d) {
+    const r2 = K8S.pods.filter(p => p.v === d.to && p.st === 'ready').length;
+    t = d.phase === 'recreate' ? `Recreate : anciens pods arrêtés, ${r2}/${K8S.D} pods v${d.to} prêts. Personne ne répond en attendant.`
+      : d.phase === 'canary' ? `Canary : 10 % du trafic sur v${d.to}` + (r2 ? `, observation encore ${Math.max(1, Math.ceil(CANARY_T - d.t))} s.` : ', le pod démarre.')
+      : `Rolling update : ${r2}/${K8S.D} pods v${d.to} prêts. Un ancien pod s'arrête dès qu'un nouveau est prêt.`;
+  } else t = (on14 && K8S.msg) || `En ligne : v${on14 ? K8S.cur : 1}` + (on14 && K8S.bad.has(K8S.cur) ? ', avec le bug : 30 % des paiements échouent.' : '.');
+  $('#depHint').textContent = t;
+  const db = $('#deployBtn'); db.disabled = !!d; db.textContent = d ? 'Déploiement en cours…' : 'Déployer v' + ((on14 ? K8S.cur : 1) + 1);
 }
 function syncSim() {
   $$('#scnSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scn === SCN.mode)));
@@ -1720,7 +1999,7 @@ function goTo(k, opts = {}) {
   step = k;
   if (changed || opts.force) {
     Ubase = STEPS[k].u; hud.users.value = sliderFromU(Ubase); rrCounter = 0;
-    CH.app = CH.lb = CH.db = false; CH.warm = 1; CH.peak = 0; SIM.q = {}; SIM.drop = {}; resetQueues();
+    CH.app = CH.lb = CH.db = false; CH.warm = 1; CH.peak = 0; SIM.q = {}; SIM.drop = {}; resetQueues(); k8sReset(k); k8sVer = K8S.ver;
     if (gl) clearParticles();
   }
   $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === k));
@@ -1757,6 +2036,11 @@ function syncControls() {
     : 'Une queue par canal : chaque canal avance à son rythme. Un SMS lent ne retarde plus le billet par email.';
   $('#peakBtn').disabled = CH.peak > 0;
   $('#peakBtn').textContent = CH.peak > 0 ? 'Pic en cours : réservations ×3' : 'Lancer un pic de réservations (10 s)';
+  const sh = { recreate: 'Recreate : on arrête tout, puis on démarre la nouvelle version. Simple, mais le site est coupé le temps du démarrage.', rolling: 'Rolling update : ' + Math.max(1, Math.ceil(SS[14].pods / 4)) + ' nouveaux pods à la fois (maxSurge 25 %). Un ancien s\'arrête dès qu\'un nouveau est prêt : pas de coupure.', canary: 'Canary : un pod de la nouvelle version reçoit 10 % du trafic pendant 8 s. Sans erreur, le rolling update continue. Sinon, retour automatique.' };
+  $('#stratHint').textContent = sh[SS[14].strategy];
+  $('#bugBtn').textContent = SS[14].bug ? 'Nouvelle version sans bug' : 'Glisser un bug dans la nouvelle version';
+  $('#bugBtn').setAttribute('aria-pressed', String(!!SS[14].bug));
+  k8sHints();
   $('#smsDownBtn').textContent = SS[12].smsDown ? 'Rétablir le fournisseur SMS' : 'Couper le fournisseur SMS';
   $('#smsDownBtn').setAttribute('aria-pressed', String(!!SS[12].smsDown));
   const lid = SS[0].closed;
@@ -1777,6 +2061,10 @@ $('#lidBtn').addEventListener('click', () => { SS[0].closed = !SS[0].closed; if 
 hud.users.addEventListener('input', () => { Ubase = uFromSlider(+hud.users.value); updateU(); computeLoads(); liveUpdate(); });
 $('#peakBtn').addEventListener('click', () => { if (step !== 11) goTo(11, { scroll: true }); CH.peak = 10; syncControls(); computeLoads(); liveUpdate(); });
 $('#smsDownBtn').addEventListener('click', () => { SS[12].smsDown = !SS[12].smsDown; if (step !== 12) goTo(12, { scroll: true }); else refresh(); });
+$('#killPodBtn').addEventListener('click', () => { if (step !== 13) goTo(13, { scroll: true }); killPod(); computeLoads(); liveUpdate(); });
+$('#killNodeBtn').addEventListener('click', () => { if (step !== 13) goTo(13, { scroll: true }); killNode(); computeLoads(); liveUpdate(); });
+$('#deployBtn').addEventListener('click', () => { if (step !== 14) goTo(14, { scroll: true }); startDeploy(); liveUpdate(); });
+$('#bugBtn').addEventListener('click', () => { SS[14].bug = !SS[14].bug; if (step !== 14) goTo(14, { scroll: true }); else refresh(); });
 $('#flushBtn').addEventListener('click', () => { if (step !== 9) goTo(9, { scroll: true }); CH.warm = 0; computeLoads(); liveUpdate(); });
 $('#scnSeg').addEventListener('click', e => {
   const b = e.target.closest('button[data-scn]'); if (!b) return;
