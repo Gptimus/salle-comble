@@ -16,8 +16,20 @@ test('12 · a booking peak fills the queue instead of failing payments', async (
 test('14 · Kubernetes recreates a killed pod', async ({ page }) => {
   await openPage(page);
   await goToStep(page, 14);
+  // Record the short "7 ready" state as it happens, so a slow runner cannot miss it.
+  await page.evaluate(() => {
+    const qline = document.querySelector('#qline');
+    window.seenSevenReady = false;
+    const observer = new MutationObserver(() => {
+      if (qline.textContent.includes('7 prêts')) {
+        window.seenSevenReady = true;
+        observer.disconnect();
+      }
+    });
+    observer.observe(qline, { childList: true, subtree: true, characterData: true });
+  });
   await page.locator('#killPodBtn').click();
-  await expect(page.locator('#qline')).toContainText('7 prêts');
+  await expect.poll(() => page.evaluate(() => window.seenSevenReady)).toBe(true);
   await expect(page.locator('#qline')).toContainText('8 prêts');
 });
 

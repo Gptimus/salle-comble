@@ -1,6 +1,7 @@
 // Static checks on the built page, run before the browser tests.
 import { existsSync, readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const html = readFileSync('dist/index.html', 'utf8');
 const errors = [];
@@ -17,12 +18,36 @@ inline.forEach((code, i) => {
   }
 });
 
-// 2. Every external script is pinned to an exact version and has SRI.
+// 2. Every external script is pinned to an exact version, listed below with its trusted
+//    SRI digest, and the page carries that exact digest. In CI (or with --online) each
+//    file is also downloaded and hashed, so a wrong pinned digest fails here, not in the browser.
+const TRUSTED_SRI = {
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js':
+    'sha384-vV17nr/rMaJqmeZkFUzXLpHdQ+ME5QHKdydaqqN+3Ga39RJlNrTatJxHwGV4ml2C',
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js':
+    'sha384-I0DMsfimAPIqWT8lF+oA997gRgdUi3jhidoTq3fN0zmn35smXZukD01FLnsPRU9i',
+};
+const online = !!process.env.CI || process.argv.includes('--online');
 for (const [tag] of html.matchAll(/<script src="[^"]+"[^>]*>/g)) {
   const src = tag.match(/src="([^"]+)"/)[1];
   if (!/@\d+\.\d+\.\d+\//.test(src)) fail(`unpinned script: ${src}`);
-  if (!/integrity="sha(256|384|512)-/.test(tag)) fail(`missing integrity: ${src}`);
   if (!/crossorigin="anonymous"/.test(tag)) fail(`missing crossorigin: ${src}`);
+  const integrity = tag.match(/integrity="([^"]+)"/)?.[1];
+  const trusted = TRUSTED_SRI[src];
+  if (!integrity) fail(`missing integrity: ${src}`);
+  else if (!trusted) fail(`no trusted digest listed in check.mjs for ${src}`);
+  else if (integrity !== trusted) fail(`integrity mismatch for ${src}: page has ${integrity}, expected ${trusted}`);
+  if (online && trusted) {
+    try {
+      const res = await fetch(src);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const [algo] = trusted.split('-');
+      const actual = `${algo}-` + createHash(algo).update(Buffer.from(await res.arrayBuffer())).digest('base64');
+      if (actual !== trusted) fail(`served file does not match trusted digest: ${src} is ${actual}`);
+    } catch (e) {
+      fail(`could not verify ${src}: ${e.message}`);
+    }
+  }
 }
 
 // 3. Steps are consistent: one section per step, numbered 1..N, each with its capacity readout.
@@ -63,4 +88,4 @@ if (errors.length) {
   console.error(`✗ ${errors.length} problem(s):\n- ` + errors.join('\n- '));
   process.exit(1);
 }
-console.log(`✓ checks passed: ${n} steps, ${inline.length} inline script(s), ${ids.size} ids`);
+console.log(`✓ checks passed: ${n} steps, SRI ${online ? 'verified online' : 'matched pinned digests'}, ${inline.length} inline script(s), ${ids.size} ids`);

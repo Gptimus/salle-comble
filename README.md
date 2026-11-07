@@ -44,8 +44,8 @@ La page est un seul fichier, `src/index.html` (three.js chargé depuis jsDelivr,
 npm ci
 npx playwright install chromium   # une fois
 npm run build                     # src/ → dist/, génère robots.txt et sitemap.xml
-npm run check                     # contrôles statiques
-npm test                          # tests navigateur (Playwright, ordinateur et mobile)
+npm run check                     # contrôles statiques (--online : télécharge et vérifie les empreintes SRI)
+npm test                          # reconstruit dist/, puis tests navigateur (Playwright, ordinateur et mobile)
 npm run serve                     # http://localhost:4173
 ```
 
@@ -54,7 +54,7 @@ npm run serve                     # http://localhost:4173
 | `src/index.html` | La page : HTML, CSS, simulation et scène 3D |
 | `src/og.png` | Image de partage (1200 × 630) |
 | `scripts/build.mjs` | Copie `src/` dans `dist/`, ajoute le numéro de build, génère `robots.txt` et `sitemap.xml` |
-| `scripts/check.mjs` | Syntaxe du script, SRI et versions figées, numérotation des étapes, ancres, ids, balises SEO |
+| `scripts/check.mjs` | Syntaxe du script, versions figées, empreintes SRI comparées à une liste de confiance (et au fichier téléchargé en CI), numérotation des étapes, ancres, ids, balises SEO |
 | `tests/` | Chaque étape se charge sans erreur ; chaque leçon se rejoue (queue, pod recréé, canary, disjoncteur, bascule de région, alerte) |
 
 ## Intégration et déploiement
