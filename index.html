@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Billetterie : scaler une infra web en 15 étapes | Salle Comble</title>
-<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues, notifications et Kubernetes. Pics, pannes, déploiements en direct.">
+<title>Billetterie : scaler une infra web en 18 étapes | Salle Comble</title>
+<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, queues, Kubernetes, disjoncteur, multi-région et SLO. Pics, pannes et alertes en direct.">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Gptimus">
 <meta name="theme-color" content="#111214">
@@ -19,12 +19,12 @@
 <meta property="og:image" content="https://gptimus.github.io/salle-comble/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Couverture de la notice : Monter une infra qui tient la charge, en 15 étapes.">
+<meta property="og:image:alt" content="Couverture de la notice : Monter une infra qui tient la charge, en 18 étapes.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Monter une infra qui tient la charge · Salle Comble">
 <meta name="twitter:description" content="Lance l'ouverture des ventes, coupe un serveur, regarde ce qui casse et ajoute la pièce qui manque. Un simulateur 3D du scaling d'une infrastructure web.">
 <meta name="twitter:image" content="https://gptimus.github.io/salle-comble/og.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 15 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues, notifications et Kubernetes. Pics, pannes, déploiements en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting", "Queues et workers", "Dead letter queue", "Notifications fan-out", "Idempotence", "Kubernetes", "Horizontal Pod Autoscaler", "KEDA", "Cluster autoscaler", "Auto-réparation", "Rolling update", "Canary"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 18 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, queues, Kubernetes, disjoncteur, multi-région et SLO. Pics, pannes et alertes en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting", "Queues et workers", "Dead letter queue", "Notifications fan-out", "Idempotence", "Kubernetes", "Horizontal Pod Autoscaler", "KEDA", "Cluster autoscaler", "Auto-réparation", "Rolling update", "Canary", "Timeouts", "Circuit breaker", "Retries et backoff", "Panne en cascade", "Multi-région", "GeoDNS", "Bascule de région", "SLO", "Budget d'erreurs", "Burn rate", "Traces distribuées"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
@@ -89,7 +89,7 @@ svg.ico { width: 1em; height: 1em; flex: none; }
 .inv-note { display: flex; gap: 10px; align-items: center; padding: 12px 16px; font-size: 14px; }
 .inv-note .mk { color: var(--red); }
 
-.stepnav { display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
+.stepnav { display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
 .stepnav button { border: 0; border-right: 1px solid var(--hatch); background: transparent; text-align: left; padding: 8px 10px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0; transition: background-color .2s; }
 .stepnav button:last-child { border-right: 0; }
 .stepnav button b { font-family: var(--font-cond); font-stretch: 62%; font-weight: 850; font-size: 30px; line-height: 1; }
@@ -130,6 +130,12 @@ svg.ico { width: 1em; height: 1em; flex: none; }
 .ctl-b { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .ctl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 .ctl-row:has(input[type=range]) { flex-wrap: nowrap; }
+.ctl-row .lbl { font-family: var(--font-cond); font-stretch: 75%; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; width: 76px; flex: none; }
+.trace-svg { display: block; width: 100%; height: auto; font-family: var(--font-code); }
+.obslog { list-style: none; margin: 0; padding: 0; font-family: var(--font-code); font-size: 13px; line-height: 1.4; }
+.obslog li { display: flex; gap: 12px; padding: 6px 0; border-top: 1px solid var(--hatch); }
+.obslog li:first-child { border-top: 0; padding-top: 0; }
+.obslog li span { color: var(--ink2); flex: none; width: 56px; }
 .ctl label, .ctl .lbl { font-size: 14px; color: var(--ink2); flex: none; }
 .ctl output { font-family: var(--font-cond); font-stretch: 68%; font-weight: 800; font-size: 20px; min-width: 2.2ch; text-align: right; font-variant-numeric: tabular-nums; }
 .ctl input[type=range] { flex: 1 1 120px; min-width: 0; }
@@ -264,7 +270,7 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 @media (max-width: 1100px) {
   .cover-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .stepnav { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .stepnav { grid-template-columns: repeat(9, minmax(0, 1fr)); }
   .stepnav button:nth-child(7) { border-right: 0; }
   .stepnav button:nth-child(-n+7) { border-bottom: 1px solid var(--hatch); }
 }
@@ -347,11 +353,11 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 <header class="cover gutter">
   <div class="wrap">
-    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-15 · FR</span></div>
+    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-18 · FR</span></div>
     <div class="cover-grid">
       <div>
         <h1>Monter une infra <span class="hl">qui tient</span> la charge</h1>
-        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Quinze étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
+        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Dix-huit étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
         <div class="dodont">
           <div class="dd bad">
             <svg class="scene" viewBox="0 0 240 96" aria-hidden="true"><g><use href="#p-users" x="4" y="16" width="64" height="64"/><use href="#p-users" x="30" y="24" width="56" height="56"/></g><path d="M86 52h62" stroke="#111214" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/><use href="#p-server" x="148" y="14" width="72" height="72"/><g stroke="#D7261B" stroke-width="3" stroke-linecap="round"><path d="M200 18l18 18M218 18l-18 18"/></g></svg>
@@ -364,14 +370,16 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
         </div>
       </div>
       <aside class="inventory" aria-label="Contenu de l'infrastructure finale">
-        <h2>Contenu <span>étape 15</span></h2>
+        <h2>Contenu <span>étape 18</span></h2>
         <ul class="inv">
           <li><svg><use href="#p-dns"/></svg><div><div class="q">1×</div><div class="n">DNS multi-IP</div></div></li>
           <li><svg><use href="#p-cdn"/></svg><div><div class="q">1×</div><div class="n">CDN (fichiers)</div></div></li>
           <li><svg><use href="#p-lb"/></svg><div><div class="q">3×</div><div class="n">Load balancer</div></div></li>
           <li><svg><use href="#p-gw"/></svg><div><div class="q">1×</div><div class="n">Passerelle · rate limit</div></div></li>
-          <li><svg><use href="#p-node"/></svg><div><div class="q">2 à 6</div><div class="n">Nœuds Kubernetes</div></div></li>
+          <li><svg><use href="#p-node"/></svg><div><div class="q">2×</div><div class="n">Région (Paris, Montréal)</div></div></li>
+          <li><svg><use href="#p-node"/></svg><div><div class="q">2 à 6</div><div class="n">Nœuds Kubernetes par région</div></div></li>
           <li><svg><use href="#p-pod"/></svg><div><div class="q">2 à 24</div><div class="n">Pods applicatifs (HPA)</div></div></li>
+          <li><svg><use href="#p-server"/></svg><div><div class="q">1×</div><div class="n">Service places, derrière un disjoncteur</div></div></li>
           <li><svg><use href="#p-cache"/></svg><div><div class="q">1×</div><div class="n">Cache Redis</div></div></li>
           <li><svg><use href="#p-queue"/></svg><div><div class="q">4×</div><div class="n">Queue (réservations, email, SMS, push)</div></div></li>
           <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Worker</div></div></li>
@@ -668,6 +676,81 @@ deployment "app" successfully rolled out</pre>
       <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="14">–</b></p>
     </section>
 
+    <section class="step" id="etape-16" data-step="15">
+      <div class="head"><span class="big" aria-hidden="true">16</span><div><h2>Timeouts, retries et disjoncteur</h2><div class="parts"><span class="part"><svg><use href="#p-server"/></svg>1× Service places</span><span class="part"><svg><use href="#p-gw"/></svg>1× Disjoncteur</span></div></div></div>
+      <p class="lead">Pour afficher les places libres, 40&nbsp;% des pages interrogent un service interne, «&nbsp;places&nbsp;». Il répond en 15&nbsp;ms. Le jour où il ralentit, que devient la billetterie&nbsp;?</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème · panne en cascade</b><p>Sans timeout, chaque pod attend le service avec un thread bloqué. Les threads s'épuisent et toutes les pages tombent, même celles qui n'ont pas besoin du service. Clique sur «&nbsp;Ralentir le service places&nbsp;».</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution</b><p>Un timeout court (250&nbsp;ms) libère les threads. Des retries espacés (backoff exponentiel, jitter, budget de 10&nbsp;%) évitent de noyer le service. Le disjoncteur (circuit breaker) coupe les appels quand plus de la moitié échoue, sert une réponse de secours et réessaie au bout de 5&nbsp;s.</p></div></div>
+      </div>
+      <pre class="term"><span class="pr">&gt;</span> GET /concert/42
+HTTP/1.1 200 OK
+X-Degraded: places-indisponibles
+{"places": "indicatif", "reserver": true}</pre>
+      <div class="tags"><span class="tag">Resilience4j</span><span class="tag">Polly</span><span class="tag">Envoy</span><span class="tag">Istio</span><span class="tag">gobreaker</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Protège les pods</div><div class="ctl-b">
+        <div class="ctl-row"><button class="btn" id="depSlowBtn" type="button" aria-pressed="false">Ralentir le service places</button></div>
+        <div class="ctl-row"><span class="lbl">Timeout</span><div class="seg" data-step="15" data-key="timeout" role="group" aria-label="Timeout des appels"><button type="button" data-val="none">Aucun</button><button type="button" data-val="2000">2 s</button><button type="button" data-val="250">250 ms</button></div></div>
+        <div class="ctl-row"><span class="lbl">Retries</span><div class="seg" data-step="15" data-key="retry" role="group" aria-label="Retries"><button type="button" data-val="none">Aucun</button><button type="button" data-val="naive">3 immédiats</button><button type="button" data-val="backoff">Backoff + budget</button></div></div>
+        <div class="ctl-row"><span class="lbl">Disjoncteur</span><div class="seg" data-step="15" data-key="cb" role="group" aria-label="Disjoncteur"><button type="button" data-val="off">Sans</button><button type="button" data-val="on">Avec secours</button></div></div>
+        <p class="hint" id="resHint" aria-live="polite"></p>
+      </div></div>
+      <div class="pnl">
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Retries naïfs</b><p>Trois retries immédiats quadruplent la charge d'un service qui sature déjà. Même réparé, il peut rester noyé sous les retries. D'où le backoff, le jitter (un délai aléatoire, pour que les clients ne réessaient pas tous en même temps) et un budget de retries.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Dégrader plutôt que tomber</b><p>Avec le disjoncteur ouvert, les pages restent en ligne avec «&nbsp;disponibilité indicative&nbsp;», et le paiement vérifie les places pour de vrai. Mieux vaut une page incomplète qu'une page d'erreur.</p></div></div>
+      </div>
+      <p class="cap">Charge maximale de ce montage, service normal&nbsp;: <b data-cap="15">–</b></p>
+    </section>
+
+    <section class="step" id="etape-17" data-step="16">
+      <div class="head"><span class="big" aria-hidden="true">17</span><div><h2>Deux régions&nbsp;: Paris et Montréal</h2><div class="parts"><span class="part"><svg><use href="#p-dns"/></svg>1× GeoDNS</span><span class="part"><svg><use href="#p-node"/></svg>2× Région</span></div></div></div>
+      <p class="lead">La tournée passe en Amérique du Nord&nbsp;: 40&nbsp;% des fans sont de l'autre côté de l'Atlantique, à 90&nbsp;ms aller-retour de Paris. Et un datacenter entier peut tomber&nbsp;: courant, réseau, erreur humaine. Sur la planche, chaque région ne montre que son squelette&nbsp;; elle contient en réalité toute la pile des étapes précédentes.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Une seule région&nbsp;: les fans d'Amérique attendent 90&nbsp;ms de plus à chaque requête, et si Paris tombe, tout le site tombe. Clique sur «&nbsp;Couper la région Paris&nbsp;».</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution</b><p>Deux régions actives, avec le même nombre de pods au total. Un GeoDNS envoie chaque fan vers la plus proche et vérifie leur santé. Si Paris tombe, il bascule tout le monde vers Montréal, et le réplica de Montréal est promu primaire.</p></div></div>
+      </div>
+      <div class="tags"><span class="tag">GeoDNS</span><span class="tag">Route 53</span><span class="tag">Cloudflare Load Balancing</span><span class="tag">Aurora Global Database</span><span class="tag">CockroachDB</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Répartis la billetterie</div><div class="ctl-b">
+        <div class="seg" data-step="16" data-key="topo" role="group" aria-label="Nombre de régions">
+          <button type="button" data-val="single">Une région</button><button type="button" data-val="multi">Deux régions</button>
+        </div>
+        <div class="ctl-row"><button class="btn" id="regDownBtn" type="button" aria-pressed="false">Couper la région Paris</button></div>
+        <p class="hint" id="regHint" aria-live="polite"></p>
+        <div class="ctl-row"><label for="r-pods-16">Pods par région</label><input type="range" id="r-pods-16" min="4" max="16" step="1" data-step="16" data-key="pods"><output data-out="16-pods"></output></div>
+        <div class="ctl-row"><label for="r-ttl-16">TTL du DNS</label><input type="range" id="r-ttl-16" min="5" max="60" step="5" data-step="16" data-key="ttl"><output data-out="16-ttl"></output></div>
+      </div></div>
+      <div class="pnl">
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Chaque région doit tenir seule</b><p>Avec 8 pods par région, Montréal reçoit d'un coup les fans de Paris et sature. Il faut assez de marge dans chaque région, ou un autoscaling rapide. Et un TTL long garde les fans sur l'IP morte&nbsp;: 30&nbsp;s de TTL, c'est jusqu'à 30&nbsp;s de panne pour eux.</p></div></div>
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Les données</b><p>Les écritures vont au primaire de Paris&nbsp;: une réservation depuis Montréal traverse l'Atlantique. Promouvoir un réplica peut perdre les dernières écritures pas encore copiées. Des bases multi-régions existent, au prix d'écritures plus lentes.</p></div></div>
+      </div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="16">–</b></p>
+    </section>
+
+    <section class="step" id="etape-18" data-step="17">
+      <div class="head"><span class="big" aria-hidden="true">18</span><div><h2>Observabilité&nbsp;: SLO, alertes, traces</h2><div class="parts"><span class="part"><svg><use href="#p-bell"/></svg>1× Alerting</span><span class="part"><svg><use href="#p-server"/></svg>1× Collecteur</span></div></div></div>
+      <p class="lead">Le simulateur affiche la latence et les erreurs en direct. En production, personne ne regarde un tableau de bord à 3&nbsp;h du matin&nbsp;: il faut décider ce qu'on promet, et être prévenu quand on ne le tient plus.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Une alerte sur «&nbsp;CPU au-dessus de 80&nbsp;%&nbsp;» sonne pour rien, et une alerte sur chaque erreur réveille l'astreinte toutes les nuits. Les fans, eux, se moquent du CPU&nbsp;: ils veulent que la page charge.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · SLO et burn rate</b><p>On fixe un objectif (SLO)&nbsp;: 99,9&nbsp;% des requêtes réussies sur 30 jours, soit 43 minutes d'erreurs permises. C'est le budget d'erreurs. On alerte sur la vitesse à laquelle il fond&nbsp;: 14,4 fois trop vite sur 5 min et sur 1 h, l'astreinte est appelée&nbsp;; 6 fois, un ticket.</p></div></div>
+      </div>
+      <div class="tags"><span class="tag">OpenTelemetry</span><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag">Jaeger</span><span class="tag">Loki</span><span class="tag">PagerDuty</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Provoque un incident</div><div class="ctl-b">
+        <div class="ctl-row"><span class="lbl">SLO</span><div class="seg" data-step="17" data-key="slo" role="group" aria-label="Objectif de disponibilité"><button type="button" data-val="99">99 %</button><button type="button" data-val="99.9">99,9 %</button><button type="button" data-val="99.99">99,99 %</button></div></div>
+        <div class="ctl-row"><span class="lbl">Disjoncteur</span><div class="seg" data-step="17" data-key="cb" role="group" aria-label="Disjoncteur"><button type="button" data-val="off">Sans</button><button type="button" data-val="on">Avec secours</button></div></div>
+        <div class="ctl-row"><button class="btn" id="depSlowBtn2" type="button" aria-pressed="false">Ralentir le service places</button><button class="btn" id="killPodBtn2" type="button">Tuer un pod</button></div>
+        <p class="hint" id="obsHint" aria-live="polite"></p>
+      </div></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Trace d'une requête</div><div class="ctl-b">
+        <svg class="trace-svg" id="traceSvg" viewBox="0 0 360 160" role="img" aria-label="Trace distribuée d'une requête, durée de chaque étape"></svg>
+        <p class="hint">Chaque service ajoute son étape (span) à la trace. On voit tout de suite où la requête perd son temps.</p>
+      </div></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Journal des événements</div><div class="ctl-b">
+        <ul class="obslog" id="obsLog" aria-live="polite"></ul>
+      </div></div>
+      <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Les trois piliers</b><p>Les métriques disent combien et à quelle vitesse (le haut de la planche). Les logs disent ce qui s'est passé (le journal). Les traces disent où le temps est passé, d'un service à l'autre. OpenTelemetry collecte les trois avec les mêmes identifiants, pour passer de l'un à l'autre.</p></div></div>
+      <p class="cap">Charge maximale de ce montage, service normal&nbsp;: <b data-cap="17">–</b></p>
+    </section>
+
   </main>
 
   <aside class="stage" id="stage" aria-label="Planche 3D de l'infrastructure">
@@ -746,6 +829,12 @@ deployment "app" successfully rolled out</pre>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Un serveur plante et reste planté</span></td><td>Pas de redémarrage automatique</td><td>Deployment Kubernetes avec sondes liveness et readiness</td><td><a class="go" href="#etape-14" data-go="13">→ 14</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Site coupé à chaque mise en production</span></td><td>Déploiement Recreate</td><td>Rolling update avec readiness probe</td><td><a class="go" href="#etape-15" data-go="14">→ 15</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Une version buguée touche tous les fans</span></td><td>Déploiement sans analyse</td><td>Canary avec retour automatique (Argo Rollouts, Flagger)</td><td><a class="go" href="#etape-15" data-go="14">→ 15</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Tout le site tombe quand un petit service ralentit</span></td><td>Appels sans timeout, threads bloqués</td><td>Timeout court et disjoncteur avec réponse de secours</td><td><a class="go" href="#etape-16" data-go="15">→ 16</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Le service reste saturé même après la correction</span></td><td>Retries immédiats qui le noient</td><td>Backoff exponentiel, jitter, budget de retries</td><td><a class="go" href="#etape-16" data-go="15">→ 16</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Les fans lointains sont plus lents que les autres</span></td><td>Une seule région</td><td>Une région proche d'eux, GeoDNS</td><td><a class="go" href="#etape-17" data-go="16">→ 17</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Une panne de datacenter coupe le site</span></td><td>Une seule région</td><td>Deux régions actives, bascule automatique, TTL court, chacune capable de tenir seule</td><td><a class="go" href="#etape-17" data-go="16">→ 17</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>L'astreinte est réveillée pour rien</span></td><td>Alertes sur le CPU ou sur chaque erreur</td><td>SLO et alertes sur le burn rate du budget d'erreurs</td><td><a class="go" href="#etape-18" data-go="17">→ 18</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>On ne sait pas où la requête perd son temps</span></td><td>Logs séparés par service</td><td>Traces distribuées (OpenTelemetry)</td><td><a class="go" href="#etape-18" data-go="17">→ 18</a></td></tr>
           </tbody>
         </table>
       </div>
@@ -785,7 +874,7 @@ deployment "app" successfully rolled out</pre>
         <div class="ex"><svg><use href="#p-bell"/></svg><span class="q">3×</span><span class="n">Email, SMS, push</span></div>
       </div>
     </div>
-    <div class="endmark"><span>Salle Comble · INFRA-15</span><span>Fin de la notice</span></div>
+    <div class="endmark"><span>Salle Comble · INFRA-18</span><span>Fin de la notice</span></div>
   </div>
 </section>
 
@@ -820,7 +909,22 @@ let ASYNC_IN = null;
 const PER_NODE = 4, MAX_NODES = 6, POD_START = 4, NODE_START = 10, NODE_IDLE = 6, HPA_EVERY = 2, HPA_DOWN = 10, HPA_MIN = 2, HPA_TARGET = 0.7;
 const CANARY = 0.1, CANARY_T = 8, BUG_ERR = 0.3;
 const K8S = { pods: [], nodes: [], uid: 0, nuid: 0, ver: 0, D: 0, hpaT: 0, downT: 0, cur: 1, dep: null, msg: '', msgT: 0, bad: new Set(), avgN: 0 };
-const isK8s = k => k >= 13;
+const isK8s = k => k >= 13 && k !== 16;
+/* Résilience : 40 % des pages appellent le service « places ». Un appel normal prend 15 ms, une page 60 ms de calcul.
+   Pendant l'appel, le pod garde un thread occupé : un service lent bloque les pods qui l'attendent. */
+const DEP_SHARE = 0.4, DEP_CAP = 16000, DEP_OK = 15, APP_MS = 60, DEP_SLOW = 2500;
+const TIMEOUTS = { none: Infinity, '2000': 2000, '250': 250 };
+const DEP = { p: 0, ms: DEP_OK, cb: 'closed', cbT: 0, bad: 0, slow: false };
+const isRes = k => k === 15 || k === 17;
+function depReset() { Object.assign(DEP, { p: 0, ms: DEP_OK, cb: 'closed', cbT: 0, bad: 0, slow: false }); }
+/* Multi-région : 60 % des fans en Europe, 40 % en Amérique. 90 ms aller-retour entre Paris et Montréal.
+   Le health check voit la panne en 3 s ; le réplica de Montréal est promu primaire au bout de 10 s. */
+const EU_SHARE = 0.6, RTT = 90, DETECT_T = 3, PROMOTE_T = 10;
+const REG = { down: false, t: 0, promoted: false };
+const regStale = () => !REG.down ? 0 : REG.t < DETECT_T ? 1 : Math.max(0, 1 - (REG.t - DETECT_T) / SS[16].ttl);
+/* Observabilité : burn rate = taux d'erreur / erreurs permises par le SLO. Fenêtres « 5 min » et « 1 h » accélérées (5 s et 30 s). */
+const OBS = { b5: 0, b60: 0, alert: 'none', t: 0, events: [] };
+function logEv(msg) { OBS.events.unshift({ t: OBS.t, msg }); if (OBS.events.length > 7) OBS.events.pop(); }
 function resetQueues() { QS.main = QS.dlq = QS.rate = QS.wait = QS.shared = 0; for (const c in QS.cq) { QS.cq[c] = 0; QS.cw[c] = 0; } }
 const CORES = {
   8:  { cap: 500,  price: 200,  ram: '32 Go' },
@@ -844,6 +948,9 @@ const STEPS = [
   { short: 'Notifications',title: 'Notifications par canal',     u: 50000 },
   { short: 'Kubernetes',   title: 'Pods et autoscaling',         u: 50000 },
   { short: 'Déploiement',  title: 'Déployer sans couper',        u: 50000 },
+  { short: 'Résilience',   title: 'Timeouts et disjoncteur',     u: 50000 },
+  { short: 'Multi-région', title: 'Deux régions',                u: 50000 },
+  { short: 'Observabilité',title: 'SLO, alertes et traces',      u: 50000 },
 ];
 const DEFAULTS = [
   { closed: false }, {}, { cores: 32 }, {},
@@ -857,6 +964,9 @@ const DEFAULTS = [
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, sms: 500, fan: 'shared', smsDown: false },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, hpa: 'off', pods: 8, maxPods: 20 },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 8, strategy: 'recreate', bug: false },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 12, timeout: 'none', retry: 'naive', cb: 'off' },
+  { apps: 8, replicas: 1, write: 20, cdn: 0, hit: 0, bots: 0, limit: 'none', mode: 'sync', workers: 8, fail: 2, pods: 8, topo: 'single', ttl: 30 },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 12, timeout: '250', retry: 'backoff', cb: 'on', slo: '99.9' },
 ];
 const CHART = [
   { closed: false }, {}, { cores: 64 }, {},
@@ -870,6 +980,9 @@ const CHART = [
   { apps: 32, replicas: 6, write: 20, cdn: 95, hit: 95, bots: 8, limit: '20', mode: 'queue', workers: 9, fail: 2, sms: 3000, fan: 'split', smsDown: false },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, hpa: 'on', pods: 8, maxPods: 24 },
   { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 8, strategy: 'canary', bug: false },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 12, timeout: '250', retry: 'backoff', cb: 'on' },
+  { apps: 8, replicas: 1, write: 20, cdn: 0, hit: 0, bots: 0, limit: 'none', mode: 'sync', workers: 8, fail: 2, pods: 12, topo: 'multi', ttl: 10 },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, pods: 12, timeout: '250', retry: 'backoff', cb: 'on', slo: '99.9' },
 ];
 const SS = DEFAULTS.map(o => ({ ...o }));
 const LBN = 3;
@@ -879,9 +992,9 @@ const LBN = 3;
 const NOCH = { app: false, lb: false, db: false, warm: 1, qBusy: false, peak: 0 };
 const CH = { app: false, lb: false, db: false, warm: 1, peak: 0 };
 const CH_FROM = { app: 1, lb: 4, db: 3 };
-let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0, BUG = 0;
+let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0, BUG = 0, EXTRA50 = 0, EXTRA99 = 0, DEPV = null;
 function loadsFor(k, s, u, ch = NOCH, out = null) {
-  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0, asyncIn = null, bug = 0;
+  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0, asyncIn = null, bug = 0, e50 = 0, e99 = 0, depv = null;
   const dbc = i => (ch.db && i === 0 ? CAP.db / 3 : CAP.db);
   const apps = (n, uu = u) => {
     if (ch.app && n === 1) { m.app0 = Infinity; return; }
@@ -930,7 +1043,28 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
     case 5: lbs(); apps(s.apps); m.db0 = u / dbc(0); break;
     case 6: lbs(); apps(s.apps);
       for (let i = 0; i < s.shards; i++) m['db' + i] = s.mode === 'copies' ? u / dbc(i) : u / s.shards / dbc(i); break;
-    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: {
+    case 16: {
+      const multi = s.topo === 'multi', live = ch !== NOCH, dn = live && REG.down, w = s.write / 100, per = s.pods * CAP.app;
+      const EU = ['lb0', 'app0', 'app1', 'app2', 'app3', 'db0'];
+      if (!multi) {
+        if (dn) { EU.forEach(id => down.add(id)); lost = 1; m.app0 = Infinity; break; }
+        m.lb0 = u / CAP.lb; for (let i = 0; i < 4; i++) m['app' + i] = u / (2 * per);
+        m.db0 = w * u / CAP.db;
+        e50 = (1 - EU_SHARE) * RTT; e99 = RTT;
+        break;
+      }
+      const stale = dn ? regStale() : 0, uE = dn ? 0 : u * EU_SHARE, uA = u * (1 - EU_SHARE) + (dn ? u * EU_SHARE * (1 - stale) : 0);
+      const promoted = live && REG.promoted;
+      if (dn) { EU.forEach(id => down.add(id)); lost = EU_SHARE * stale; if (!promoted) bug += w * (1 - lost); }
+      else { m.lb0 = uE / CAP.lb; for (let i = 0; i < 4; i++) m['app' + i] = uE / per; m.db0 = w * u / CAP.db; }
+      m.lb1 = uA / CAP.lb; for (let i = 4; i < 8; i++) m['app' + i] = uA / per;
+      /* Chaque région a 3 réplicas de lecture ; un seul est dessiné. Promu, il ne prend plus que les écritures. */
+      m.rep0 = (promoted ? w * uA : (1 - w) * uA / 3) / CAP.db;
+      e50 = dn ? EU_SHARE * (1 - stale) * RTT : (1 - EU_SHARE) * w * RTT;
+      e99 = RTT;
+      break;
+    }
+    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 17: {
       const w = (k >= 11 && ch.peak > 0 ? Math.min(90, s.write * 3) : s.write) / 100, R = s.replicas;
       const h = k >= 8 ? s.cdn / 100 : 0, f = 1 - STATIC * h;
       const hc = k >= 9 ? s.hit / 100 * ch.warm : 0;
@@ -942,6 +1076,20 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
         m.gw0 = uIn * f / CAP.gw;
       }
       lbs(uIn * f); if (isK8s(k)) pods(uOut * f); else apps(s.apps, uOut * f);
+      if (isRes(k)) {
+        const T = TIMEOUTS[s.timeout], live = ch !== NOCH, st = live ? DEP : { p: 0, ms: DEP_OK, cb: 'closed' };
+        const p = st.p, ms = st.ms, r3 = p + p * p + p * p * p;
+        const extra = s.retry === 'naive' ? r3 : s.retry === 'backoff' ? Math.min(0.1, r3) : 0, a = 1 + extra;
+        const callF = st.cb === 'open' ? 0 : st.cb === 'half' ? 0.05 : 1;
+        const wait = isFinite(T) ? ms * (1 - Math.exp(-T / ms)) : ms;
+        const occ = (APP_MS + DEP_SHARE * callF * a * wait) / (APP_MS + DEP_SHARE * DEP_OK);
+        for (const id in m) if (id.startsWith('app')) m[id] *= occ;
+        m.dep0 = DEP_SHARE * uOut * f * callF * a / (live && DEP.slow ? DEP_CAP / 4 : DEP_CAP);
+        const pf = Math.max(0, p - extra * (1 - p));
+        bug += DEP_SHARE * callF * pf;
+        e50 = DEP_SHARE * callF * a * wait; e99 = callF ? a * Math.min(T, ms * 4.6) : 0;
+        depv = { a, callF, wait, pf, T };
+      }
       if (k >= 8) m.cdn0 = uIn * STATIC * h / CAP.cdn;
       if (k >= 9) m.cache0 = (1 - w) * uOut / CAP.cache;
       if (k >= 11 && s.mode === 'queue') {
@@ -961,7 +1109,7 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
       break;
     }
   }
-  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; out.async = asyncIn; out.bug = bug; }
+  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; out.async = asyncIn; out.bug = bug; out.e50 = e50; out.e99 = e99; out.dep = depv; }
   return m;
 }
 const maxOf = m => { let best = 0, id = null; for (const k in m) { if (isAsync(k)) continue; if (m[k] > best || id === null) { best = m[k]; id = k; } } return { load: best, id }; };
@@ -979,6 +1127,9 @@ function neckNameFor(k, id) {
   if (id.startsWith('lb')) return 'Load balancer';
   if (id.startsWith('rep')) return 'Réplicas';
   if (id === 'cdn0') return 'CDN';
+  if (id === 'dep0') return 'Service places';
+  if (k === 16 && id === 'rep0') return REG.promoted ? 'Primaire Montréal' : 'Réplica Montréal';
+  if (k === 16 && id === 'db0') return 'Primaire Paris';
   if (id === 'cache0') return 'Cache Redis';
   if (id === 'gw0') return 'Passerelle';
   if (id === 'db0' && k >= 11 && SS[k].mode === 'queue') return 'Primaire (via les workers)';
@@ -997,6 +1148,30 @@ function appPos(N, x0) {
 function colZ(n, sp) { const a = []; for (let i = 0; i < n; i++) a.push((i - (n - 1) / 2) * sp); return a; }
 function shardRange(i, S) { const per = Math.round(1000 / S); const a = i * per + 1, b = i === S - 1 ? 1000 : (i + 1) * per; return 'fans ' + a + '–' + b; }
 
+/* Deux régions : la pile complète des étapes 1 à 16 tourne dans chacune ; la planche n'en montre que le squelette. */
+function regionLayout(s, node, edge) {
+  const multi = s.topo === 'multi';
+  node('users', 'users', [-8.6, 0, 0], 'Fans');
+  node('dns', 'dns', [-6.4, 2.8, 0], multi ? 'GeoDNS · health check' : 'DNS');
+  edge('users', 'dns', { dashed: true });
+  const R = [
+    { id: 'E', z: -3.4, name: 'Europe · Paris', lb: 'lb0', a0: 0, db: 'db0', dbt: 'dbm', dbl: 'Primaire' },
+    { id: 'A', z: 3.4, name: 'Amérique · Montréal', lb: 'lb1', a0: 4, db: 'rep0', dbt: REG.promoted ? 'dbm' : 'db', dbl: REG.promoted ? 'Primaire (promu)' : 'Réplicas ×3' },
+  ];
+  for (const r of multi ? R : R.slice(0, 1)) {
+    node('reg' + r.id, 'region', [-4.6, 0, r.z - 2.1], r.name);
+    node(r.lb, 'lb', [-3.2, 0, r.z], 'LB');
+    edge('users', r.lb); edge('dns', r.lb, { dashed: true });
+    for (let j = 0; j < 4; j++) {
+      const id = 'app' + (r.a0 + j);
+      node(id, 'srv2', [-0.7 + (j % 2) * 1.9, 0, r.z + (j < 2 ? -0.95 : 0.95)], 'Pods ×' + (multi ? s.pods : 2 * s.pods), { hideLabel: j !== 0 });
+      edge(r.lb, id, { faint: true }); edge(id, r.db, { faint: true });
+      if (r.id === 'A' && !REG.promoted) edge(id, 'db0', { faint: true, lift: 1.6 });
+    }
+    node(r.db, r.dbt, [3.6, 0, r.z], r.dbl);
+  }
+  if (multi) edge('db0', 'rep0', { dashed: true, lift: 1.2 });
+}
 /* Cluster : 2 colonnes de nœuds, 4 emplacements de pod par nœud. Un pod qui démarre est plus petit. */
 function k8sLayout(node) {
   /* L'étiquette du cluster va sur le nœud de devant, pour ne pas passer sous celle de la passerelle. */
@@ -1011,6 +1186,7 @@ function layout(k) {
   const s = SS[k], N = [], E = [];
   const node = (id, type, pos, label, extra = {}) => N.push({ id, type, pos, label, ...extra });
   const edge = (a, b, o = {}) => E.push({ a, b, ...o });
+  if (k === 16) { regionLayout(s, node, edge); return { nodes: N, edges: E }; }
   const usersX = k <= 3 ? -5 : k === 4 ? -7.5 : -8.6;
   node('users', 'users', [usersX, 0, 0], 'Fans');
   if (k === 0) { node('laptop', 'laptop', [0, 0, 0], 'Laptop du dev'); edge('users', 'laptop'); }
@@ -1049,6 +1225,7 @@ function layout(k) {
         if (s.mode === 'copies') for (let j = i + 1; j < S; j++) edge('db' + i, 'db' + j, { dashed: true, lift: 0.9 });
       }
     }
+    if (isRes(k)) { node('dep0', 'srv2', [1.6, 0, -4.6], 'Service places'); for (const a of AT) edge(a, 'dep0', { faint: true }); }
     if (k >= 11 && s.mode === 'queue') {
       node('q0', 'queue', [2.4, 0, 6.0], 'Queue');
       node('wk0', 'srv1', [5.4, 0, 6.0], 'Workers');
@@ -1104,8 +1281,8 @@ function scnLabel() {
    s'accumule dans sa file (en secondes d'attente). Pleine (2 s), elle abandonne l'excédent.
    Sous 100 %, la file se vide au rythme de la capacité libre. */
 const TIMEOUT = 2;
-const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8, cdn: 15, cache: 1, gw: 2, q: 3 };
-const SIM = { q: {}, drop: {}, p50: 0, p99: 0, err: 0, hist: [], histAcc: 0 };
+const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8, cdn: 15, cache: 1, gw: 2, q: 3, dep: 15 };
+const SIM = { q: {}, drop: {}, lat: {}, p50: 0, p99: 0, err: 0, hist: [], histAcc: 0 };
 const kindOf = id => id.replace(/\d+$/, '');
 /* Files asynchrones : la réponse au fan part tout de suite, le travail attend son tour. Rien n'est perdu, tout est retardé. */
 function asyncStep(dt) {
@@ -1151,7 +1328,7 @@ function k8sReset(k) {
 }
 const podsOn = id => { let c = 0; for (const p of K8S.pods) if (p.node === id) c++; return c; };
 const podName = p => 'billets-' + ((+p.id.slice(3) * 7919 + 1297) % 46656).toString(36).padStart(3, '0');
-function setMsg(m, t = 8) { K8S.msg = m; K8S.msgT = t; }
+function setMsg(m, t = 8) { K8S.msg = m; K8S.msgT = t; logEv(m); }
 function delPod(p) { const i = K8S.pods.indexOf(p); if (i >= 0) { K8S.pods.splice(i, 1); K8S.ver++; } }
 function killPod() {
   const r = K8S.pods.filter(p => p.st === 'ready'); if (!r.length) return;
@@ -1247,6 +1424,39 @@ function k8sStep(dt, k) {
   K8S.avgN += (K8S.nodes.length - K8S.avgN) * Math.min(1, dt / 20);
   if (ch) K8S.ver++;
 }
+/* Disjoncteur : fermé, ouvert 5 s quand plus de la moitié des appels échouent pendant 1 s, puis entrouvert (5 % d'appels d'essai). */
+function depStep(dt) {
+  if (!isRes(step)) return;
+  const s = SS[step], T = TIMEOUTS[s.timeout], L = loads.dep0 || 0;
+  const ms = DEP_OK / (1 - Math.min(L, 0.92)) + (SIM.q.dep0 || 0) * 1000 + (DEP.slow ? DEP_SLOW : 0);
+  const drop = SIM.drop.dep0 || 0, pNow = Math.min(1, drop + (1 - drop) * (isFinite(T) ? Math.exp(-T / ms) : 0));
+  const k = 1 - Math.exp(-dt / 0.6);
+  DEP.ms += (ms - DEP.ms) * k;
+  if (DEP.cb !== 'open') DEP.p += (pNow - DEP.p) * k;
+  if (s.cb !== 'on') { DEP.cb = 'closed'; return; }
+  DEP.cbT += dt;
+  const open = () => { DEP.cb = 'open'; DEP.cbT = 0; DEP.bad = 0; logEv('Disjoncteur ouvert : service places coupé, réponse de secours.'); };
+  if (DEP.cb === 'closed') { if (DEP.p > 0.5) { DEP.bad += dt; if (DEP.bad >= 1) open(); } else DEP.bad = 0; }
+  else if (DEP.cb === 'open') { if (DEP.cbT >= 5) { DEP.cb = 'half'; DEP.cbT = 0; DEP.p = 0; logEv('Disjoncteur entrouvert : 5 % d\'appels d\'essai.'); } }
+  else if (DEP.cbT >= 1.5) { if (pNow > 0.5) open(); else { DEP.cb = 'closed'; DEP.cbT = 0; logEv('Disjoncteur refermé : le service places répond.'); } }
+}
+function regStep(dt) {
+  if (step !== 16 || !REG.down) return;
+  REG.t += dt;
+  if (SS[16].topo === 'multi' && !REG.promoted && REG.t >= PROMOTE_T) { REG.promoted = true; logEv('Réplica de Montréal promu primaire.'); if (gl) applyLayout(); }
+}
+function obsStep(dt) {
+  OBS.t += dt;
+  if (step !== 17) return;
+  const budget = 1 - +SS[17].slo / 100, b = SIM.err / budget;
+  OBS.b5 += (b - OBS.b5) * (1 - Math.exp(-dt / 5)); OBS.b60 += (b - OBS.b60) * (1 - Math.exp(-dt / 30));
+  const a = OBS.b5 >= 14.4 && OBS.b60 >= 14.4 ? 'page' : OBS.b5 >= 6 && OBS.b60 >= 6 ? 'ticket' : 'none';
+  if (a !== OBS.alert) {
+    const rank = { none: 0, ticket: 1, page: 2 };
+    logEv(a === 'page' ? 'ALERTE critique : burn rate ×' + Math.round(OBS.b60) + ', astreinte appelée.' : a === 'ticket' ? (rank[a] > rank[OBS.alert] ? 'Avertissement : budget consommé 6 fois trop vite, ticket ouvert.' : 'Alerte critique levée, ticket maintenu.') : 'Alerte résolue.');
+    OBS.alert = a;
+  }
+}
 function simStep(dt) {
   const q = SIM.q, drop = SIM.drop;
   for (const id in q) if (!(id in loads)) delete q[id];
@@ -1267,9 +1477,9 @@ function simStep(dt) {
       if (L > 1 && b >= TIMEOUT * 0.98) d = 1 - 1 / L;
       lat = BASE_MS[kindOf(id)] / (1 - Math.min(L, 0.92)) + b * 1000;
     }
-    q[id] = b; drop[id] = d;
+    q[id] = b; drop[id] = d; SIM.lat[id] = lat;
     let kind = kindOf(id), wt = 1, explicit = false;
-    if (kind === 'cdn') continue;
+    if (kind === 'cdn' || kind === 'dep') continue;
     if (step >= 7 && (kind === 'db' || kind === 'rep')) { wt = kind === 'db' ? (QMODE ? 0 : w7) : (1 - w7) * (1 - hc) / S.replicas; kind = 'data'; explicit = true; }
     if (kind === 'cache') { wt = 1 - w7; explicit = true; }
     const t = tiers[kind] || (tiers[kind] = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit });
@@ -1283,7 +1493,7 @@ function simStep(dt) {
     p99 += t.max * 3;
   }
   SIM.err = Math.min(1, Math.max(0, 1 - ok));
-  SIM.p50 = Math.min(p50, TIMEOUT * 1000); SIM.p99 = Math.min(p99, TIMEOUT * 1000);
+  SIM.p50 = Math.min(p50 + EXTRA50, TIMEOUT * 1000); SIM.p99 = Math.min(p99 + EXTRA99, TIMEOUT * 1000);
   SIM.histAcc += dt;
   if (SIM.histAcc >= 0.5) {
     SIM.histAcc = 0;
@@ -1295,7 +1505,7 @@ function computeLoads() {
   const out = {};
   CH.qBusy = QS.main > 1;
   loads = loadsFor(step, SS[step], U, CH, out);
-  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked; ASYNC_IN = out.async; BUG = out.bug;
+  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked; ASYNC_IN = out.async; BUG = Math.min(1, out.bug); EXTRA50 = out.e50; EXTRA99 = out.e99; DEPV = out.dep;
 }
 
 /* ---------- Three.js ---------- */
@@ -1510,7 +1720,14 @@ function mkPod(mat) {
   g.userData = { led, h: 0.5 };
   return g;
 }
+function mkRegion() {
+  const g = new THREE.Group();
+  const p = lined(box(9.4, 0.05, 4.2), M.body); p.position.set(4.7, 0.025, 2.1); g.add(p);
+  g.userData = { h: 0.05, anchorY: 0.06 };
+  return g;
+}
 function build(type) {
+  if (type === 'region') return mkRegion();
   if (type === 'knode') return mkKNode();
   if (type === 'pod') return mkPod(M.body);
   if (type === 'pod2') return mkPod(M.lb);
@@ -1616,6 +1833,7 @@ function kindColor(kind, fig) {
   if (kind === 'static') return new THREE.Color('#1E8F5A');
   if (kind === 'bot') return new THREE.Color('#E8A900');
   if (kind === 'notif') return new THREE.Color('#7A4BD6');
+  if (kind === 'fallback') return new THREE.Color('#8A8F98');
   if (kind === 'sticky') return new THREE.Color(STICKY[fig % STICKY.length]);
   return TOK.ink;
 }
@@ -1653,7 +1871,16 @@ function makeRoute() {
       const write = Math.random() < 0.15, d = randInt(s.shards);
       return { hops: ['users', lb, app, 'db' + d], kind: write ? 'write' : 'read', fig, sync: write ? { from: 'db' + d, to: Array.from({ length: s.shards }, (_, i) => 'db' + i).filter(x => x !== 'db' + d) } : null };
     }
-    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: {
+    case 16: {
+      const multi = s.topo === 'multi';
+      let reg = multi && Math.random() > EU_SHARE ? 'A' : 'E';
+      if (multi && REG.down && reg === 'E' && Math.random() > regStale()) reg = 'A';
+      const lb = reg === 'E' ? 'lb0' : 'lb1', app = 'app' + ((reg === 'E' ? 0 : 4) + randInt(4));
+      const write = Math.random() < s.write / 100, prim = REG.promoted ? 'rep0' : 'db0';
+      const dbh = write ? prim : reg === 'E' ? 'db0' : 'rep0';
+      return { hops: ['users', lb, app, dbh], kind: write ? 'write' : 'read', fig, liftLast: (reg === 'A') !== (dbh === 'rep0') ? 1.6 : 0 };
+    }
+    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 17: {
       const qm = step >= 11 && s.mode === 'queue';
       if (qm && QS.rate > 0) {
         const r = Math.random();
@@ -1670,6 +1897,10 @@ function makeRoute() {
         pre.push('gw0');
       }
       pre.push('app' + pickApp(s, fig));
+      if (isRes(step) && DEPV && Math.random() < DEP_SHARE) {
+        if (Math.random() >= DEPV.callF) return { hops: pre, kind: 'fallback', fig };
+        return { hops: [...pre, 'dep0'], kind: kind || 'read', fig, block, failAt: Math.random() < DEPV.pf ? 'dep0' : null };
+      }
       if (isK8s(step)) { const pd = K8S.pods.find(p => p.id === pre[pre.length - 1]); if (pd && K8S.bad.has(pd.v) && Math.random() < BUG_ERR) return { hops: pre, kind: kind || 'req', fig, failAt: pd.id }; }
       if (Math.random() < s.write / 100) return qm ? { hops: [...pre, 'q0'], kind: kind || 'write', fig, block } : { hops: [...pre, 'db0'], kind: kind || 'write', fig, block, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
       const rep = 'rep' + randInt(s.replicas);
@@ -1832,6 +2063,14 @@ function updateLabelText() {
     let html;
     if (n.id === 'users') html = `<div class="tagbox"><span class="nm">Fans</span><span class="ld">${fmt(U)}</span></div>`;
     else if (isAsync(n.id)) html = asyncLabel(n.id);
+    else if (/^reg[EA]$/.test(n.id)) {
+      const dn = n.id === 'regE' && REG.down;
+      html = `<div class="tagbox"><span class="nm">${n.spec.label}</span><span class="ld st-${dn ? 'bad' : 'ok'}">${dn ? 'Hors service' : 'En service'}</span></div>`;
+    }
+    else if (n.id === 'dep0') {
+      const L = loads.dep0 || 0, cb = DEP.cb === 'open' ? 'disjoncteur ouvert' : DEP.cb === 'half' ? 'disjoncteur entrouvert' : '';
+      html = `<div class="tagbox"><span class="nm">Service places${cb ? ' · ' + cb : ''}</span><span class="ld st-${DEP.cb === 'open' ? 'warn' : stOf(DEP.p > 0.5 ? 2 : L)}">${DEP.cb === 'open' ? 'coupé' : pct(L)}</span></div>`;
+    }
     else if (/^kn\d/.test(n.id)) {
       const r = K8S.pods.filter(p => p.st === 'ready'); let L = r.length ? 0 : Infinity;
       for (const p of r) L = Math.max(L, loads[p.id] || 0);
@@ -1866,6 +2105,8 @@ function legendFor(k) {
   if (k === 8) return it('#1E8F5A', 'Fichier servi par le CDN') + it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--red)', 'Perdue');
   if (k === 11) return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Réservation') + it('var(--hatch)', 'Synchro') + it('var(--red)', 'Perdue');
   if (k === 12) return it('var(--ink)', 'Réservation') + it('#7A4BD6', 'Notification') + it('var(--blue)', 'Lecture') + it('var(--red)', 'Perdue');
+  if (isRes(k)) return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Réservation') + it('#8A8F98', 'Réponse de secours') + it('var(--red)', 'Perdue');
+  if (k === 16) return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--red)', 'Perdue');
   if (k === 10) return it('var(--blue)', 'Fan') + it('#E8A900', 'Bot') + it('var(--hatch)', 'Bloqué · 429') + it('var(--red)', 'Perdue');
   return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--hatch)', 'Synchro') + it('var(--red)', 'Perdue');
 }
@@ -1883,6 +2124,7 @@ function advanceSim(dt) {
     if (SCN.mode === 'rush' && SCN.t > RUSH_END) { SCN.mode = 'manual'; SCN.t = 0; syncSim(); }
   }
   if (isK8s(step) && CH.app) { CH.app = false; killPod(); syncSim(); }
+  if (step === 16) CH.app = CH.lb = CH.db = false;
   updateU();
   computeLoads();
   asyncStep(dt);
@@ -1890,6 +2132,7 @@ function advanceSim(dt) {
   k8sStep(SCN.mode === 'day' ? dt * 15 : dt, step);
   if (K8S.ver !== k8sVer) { k8sVer = K8S.ver; if (gl) applyLayout(); computeLoads(); }
   simStep(dt);
+  depStep(dt); regStep(dt); obsStep(dt);
   liveAcc += dt;
   if (liveAcc >= 0.25) { liveAcc = 0; liveUpdate(); }
 }
@@ -1922,7 +2165,7 @@ function liveUpdate() {
   if (step === 0 && SS[0].closed) bn = 'Le laptop est fermé';
   else if (!isFinite(top.load)) bn = 'Hors service : ' + neckNameFor(step, top.id);
   else bn = 'Pièce la plus chargée : ' + neckNameFor(step, top.id) + ' · ' + pct(top.load);
-  if (DOWN.size && !isK8s(step)) bn += ' · ' + [...DOWN].map(d => (d.startsWith('lb') ? 'LB 1' : 'App 1')).join(', ') + ' en panne';
+  if (DOWN.size && step <= 12) bn += ' · ' + [...DOWN].map(d => (d.startsWith('lb') ? 'LB 1' : 'App 1')).join(', ') + ' en panne';
   hud.bneck.textContent = bn;
   mtr.p50.textContent = fmtMs(SIM.p50);
   mtr.p99.textContent = fmtMs(SIM.p99);
@@ -1930,14 +2173,28 @@ function liveUpdate() {
   mtr.err.className = SIM.err >= 0.02 ? 'st-bad' : '';
   mtr.scn.textContent = scnLabel();
   const qm = step >= 11 && SS[step].mode === 'queue';
-  mtr.q.hidden = !qm;
-  if (isK8s(step)) {
+  mtr.q.hidden = !qm && step < 13;
+  const setQ = t => { if (mtr.q.dataset.h !== t) { mtr.q.innerHTML = t; mtr.q.dataset.h = t; } };
+  if (step >= 13) k8sHints();
+  if (step === 15) {
+    const cb = { closed: 'fermé', open: 'ouvert', half: 'entrouvert' }[DEP.cb];
+    setQ((DEP.cb === 'open' ? 'Service places <b>coupé</b>' : `Service places <b>${pct(loads.dep0 || 0)}</b> · <b>${fmtMs(DEP.ms)}</b>`) + ` · disjoncteur <b>${cb}</b>` + (DEPV && DEPV.a > 1.05 ? ` · appels <b>×${DEPV.a.toFixed(1).replace('.', ',')}</b>` : '') + (DEP.cb !== 'closed' ? ` · secours <b>${Math.round(DEP_SHARE * (1 - (DEPV ? DEPV.callF : 1)) * 100)} %</b>` : ''));
+  } else if (step === 16) {
+    const multi = SS[16].topo === 'multi';
+    setQ(multi
+      ? `Paris <b>${REG.down ? 'hors service' : 'OK'}</b> · Montréal <b>OK</b>` + (REG.down ? ` · encore vers Paris <b>${Math.round(EU_SHARE * regStale() * 100)} %</b>` : '') + ` · primaire <b>${REG.promoted ? 'Montréal' : 'Paris'}</b>`
+      : `Une région · Paris <b>${REG.down ? 'hors service' : 'OK'}</b> · fans d'Amérique <b>+${RTT} ms</b>`);
+  } else if (step === 17) {
+    const al = { none: 'aucune alerte', ticket: 'ticket', page: 'astreinte appelée' }[OBS.alert], bx = v => '×' + (v < 10 ? v.toFixed(1).replace('.', ',') : Math.round(v));
+    setQ(`SLO <b>${SS[17].slo.replace('.', ',')} %</b> · burn 5 min <b>${bx(OBS.b5)}</b> · 1 h <b>${bx(OBS.b60)}</b> · <b class="${OBS.alert === 'page' ? 'st-bad' : ''}">${al}</b>`);
+  }
+  if (step >= 15) phase5Hints();
+  if (isK8s(step) && !isRes(step)) {
     const c = { ready: 0, start: 0, pending: 0 }; for (const p of K8S.pods) c[p.st]++;
     let t = `Pods <b>${c.ready}</b> prêts` + (c.start ? ` · <b>${c.start}</b> démarrent` : '') + (c.pending ? ` · <b>${c.pending}</b> en attente` : '') + ` · Nœuds <b>${K8S.nodes.length}</b>`;
     if (step === 13) t += ` · moyenne <b>${K8S.avgN.toFixed(1).replace('.', ',')}</b>`;
     if (mtr.q.dataset.h !== t) { mtr.q.innerHTML = t; mtr.q.dataset.h = t; }
-    k8sHints();
-  } else if (qm) {
+  } else if (qm && step < 13) {
     let t = step === 12
       ? Object.keys(CHN).map(c => `${CHN[c]} <b>${fmtWait(QS.cw[c])}</b>`).join(' · ')
       : `Queue <b>${fmt(QS.main)}</b> · attente <b>${fmtWait(QS.wait)}</b> · DLQ <b>${fmt(QS.dlq)}</b>`;
@@ -1971,6 +2228,62 @@ function k8sHints() {
   $('#depHint').textContent = t;
   const db = $('#deployBtn'); db.disabled = !!d; db.textContent = d ? 'Déploiement en cours…' : 'Déployer v' + ((on14 ? K8S.cur : 1) + 1);
 }
+function phase5Hints() {
+  const s = SS[15], on = step === 15;
+  let t;
+  if (on && !DEP.slow && DEP.p > 0.3 && DEP.cb === 'closed') t = 'Le service est réparé, mais ' + (s.retry === 'naive' ? 'les retries immédiats le maintiennent à terre : chaque échec en déclenche trois autres. C\'est une panne métastable. Passe en backoff ou ajoute le disjoncteur.' : 'il vide encore sa file d\'attente.');
+  else if (!on || !DEP.slow) t = 'Service places normal : 15 ms par appel. Clique sur « Ralentir le service places ».';
+  else if (DEP.cb === 'open') t = 'Disjoncteur ouvert : plus aucun appel. Les pages affichent une disponibilité indicative, le service se repose. Nouvel essai dans ' + Math.max(1, Math.ceil(5 - DEP.cbT)) + ' s.';
+  else if (DEP.cb === 'half') t = 'Disjoncteur entrouvert : 5 % d\'appels d\'essai pour voir si le service est revenu.';
+  else {
+    let mx = 0; for (const id in loads) if (id.startsWith('app')) mx = Math.max(mx, loads[id]);
+    t = mx >= 1 ? 'Les pods attendent le service, threads bloqués : toutes les pages ralentissent, même celles qui n\'en ont pas besoin. C\'est la panne en cascade.'
+      : Math.round(DEP_SHARE * (DEPV ? DEPV.pf : 0) * 100) + ' % des pages en erreur : les appels au service échouent' + (s.retry === 'naive' && DEPV && DEPV.a > 1.5 ? ', et les retries multiplient sa charge par ' + DEPV.a.toFixed(1).replace('.', ',') + '.' : '.');
+  }
+  $('#resHint').textContent = t;
+  for (const id of ['#depSlowBtn', '#depSlowBtn2']) { const b = $(id); b.textContent = DEP.slow && isRes(step) ? 'Réparer le service places' : 'Ralentir le service places'; b.setAttribute('aria-pressed', String(DEP.slow && isRes(step))); }
+  const multi = SS[16].topo === 'multi', o16 = step === 16;
+  let r;
+  if (!o16 || !REG.down) r = multi ? 'Le GeoDNS envoie chaque fan vers la région la plus proche. Les écritures de Montréal traversent l\'Atlantique jusqu\'au primaire de Paris.' : 'Tout est à Paris : les fans d\'Amérique paient 90 ms de plus par requête.';
+  else if (!multi) r = 'Paris est hors service, et c\'est la seule région : tout le site est coupé.';
+  else if (REG.t < DETECT_T) r = 'Paris est hors service. Le health check du GeoDNS n\'a pas encore vu la panne.';
+  else r = (regStale() > 0 ? Math.round(EU_SHARE * regStale() * 100) + ' % des fans gardent l\'ancienne IP en cache (TTL ' + SS[16].ttl + ' s) et tombent sur Paris. ' : 'Tous les fans sont sur Montréal. ') + (REG.promoted ? 'Le réplica de Montréal a été promu primaire.' : 'Pas de primaire : les réservations échouent jusqu\'à la promotion du réplica.');
+  $('#regHint').textContent = r;
+  $('#regDownBtn').textContent = REG.down && o16 ? 'Rétablir Paris' : 'Couper la région Paris';
+  $('#regDownBtn').setAttribute('aria-pressed', String(REG.down && o16));
+  const slo = +SS[17].slo, bmin = (100 - slo) / 100 * 30 * 24 * 60;
+  const bt = bmin >= 120 ? (bmin / 60).toFixed(1).replace('.', ',') + ' h' : Math.round(bmin) + ' min';
+  let o;
+  if (step === 17 && OBS.alert !== 'none') {
+    const h = 30 * 24 / Math.max(1, OBS.b60), ht = h >= 48 ? Math.round(h / 24) + ' jours' : h >= 1 ? Math.round(h) + ' h' : Math.max(1, Math.round(h * 60)) + ' min';
+    o = (OBS.alert === 'page' ? 'Alerte critique : ' : 'Avertissement : ') + 'à ce rythme, le budget d\'erreurs du mois est épuisé en ' + ht + '.' + (OBS.alert === 'page' ? ' L\'astreinte est appelée.' : ' Un ticket est ouvert.');
+  } else o = 'SLO ' + SS[17].slo.replace('.', ',') + ' % : ' + bt + ' d\'erreurs permises sur 30 jours. Aucune alerte.';
+  $('#obsHint').textContent = o;
+  if (step === 17) { drawTrace(); drawLog(); }
+}
+function drawLog() {
+  const h = OBS.events.length ? OBS.events.map(e => `<li><span>T+${Math.floor(e.t)} s</span>${e.msg.replace(/</g, '&lt;')}</li>`).join('') : '<li><span>–</span>Rien à signaler.</li>';
+  const el = $('#obsLog'); if (el.dataset.h !== h) { el.innerHTML = h; el.dataset.h = h; }
+}
+function drawTrace() {
+  const L = SIM.lat, avg = pre => { let s = 0, n = 0; for (const id in L) if (id.startsWith(pre) && id in loads) { s += L[id]; n++; } return n ? s / n : 0; };
+  const T = TIMEOUTS[SS[17].timeout], fb = DEP.cb === 'open', depT = fb ? 0.3 : Math.min(DEP.ms, T), fail = !fb && DEPV && DEPV.pf > 0.3;
+  const lb = avg('lb'), gw = L.gw0 || 2, cache = L.cache0 || 1, rep = avg('rep'), app = avg('app');
+  const kids = [['cache redis', cache], ['service-places', depT, fail ? 'var(--red)' : fb ? '#8A8F98' : 'var(--blue)', fb ? ' · secours' : fail ? ' · timeout' : ''], ['réplica', rep]];
+  const appT = app + kids.reduce((a, k) => a + k[1], 0), total = lb + gw + appT;
+  const rows = [['GET /concert/42', 0, total], ['load-balancer', 0, lb], ['passerelle', lb, gw], ['pod billets', lb + gw, appT]];
+  let x = lb + gw; for (const k of kids) { rows.push(['  ' + k[0], x, k[1], k[2], k[3]]); x += k[1]; }
+  const W = 360, X0 = 128, RH = 22, sc = (W - X0 - 104) / Math.max(1, total);
+  let s = '';
+  rows.forEach((r, i) => {
+    const y = 6 + i * RH, bx = X0 + r[1] * sc, bw = Math.max(2, r[2] * sc);
+    s += `<text x="4" y="${y + 13}" font-size="12" fill="var(--ink)">${r[0].replace(/ /g, '\u00a0')}</text>`;
+    s += `<rect x="${bx.toFixed(1)}" y="${y + 3}" width="${bw.toFixed(1)}" height="13" fill="${r[3] || (i ? 'var(--ink)' : 'var(--ink2)')}"/>`;
+    s += `<text x="${(bx + bw + 4).toFixed(1)}" y="${y + 13}" font-size="11" fill="var(--ink2)">${fmtMs(r[2])}${r[4] || ''}</text>`;
+  });
+  const svg = $('#traceSvg'); svg.setAttribute('viewBox', `0 0 ${W} ${rows.length * RH + 8}`);
+  if (svg.dataset.h !== s) { svg.innerHTML = s; svg.dataset.h = s; }
+}
 function syncSim() {
   $$('#scnSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scn === SCN.mode)));
   $$('#chaosSeg button').forEach(b => {
@@ -1999,7 +2312,7 @@ function goTo(k, opts = {}) {
   step = k;
   if (changed || opts.force) {
     Ubase = STEPS[k].u; hud.users.value = sliderFromU(Ubase); rrCounter = 0;
-    CH.app = CH.lb = CH.db = false; CH.warm = 1; CH.peak = 0; SIM.q = {}; SIM.drop = {}; resetQueues(); k8sReset(k); k8sVer = K8S.ver;
+    CH.app = CH.lb = CH.db = false; CH.warm = 1; CH.peak = 0; SIM.q = {}; SIM.drop = {}; resetQueues(); k8sReset(k); k8sVer = K8S.ver; depReset(); Object.assign(REG, { down: false, t: 0, promoted: false }); Object.assign(OBS, { b5: 0, b60: 0, alert: 'none', t: 0, events: [] }); SIM.lat = {};
     if (gl) clearParticles();
   }
   $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === k));
@@ -2016,7 +2329,7 @@ function goTo(k, opts = {}) {
 /* ---------- Contrôles ---------- */
 function syncControls() {
   $$('.seg[data-step]').forEach(seg => { const k = +seg.dataset.step, key = seg.dataset.key; seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(String(SS[k][key]) === b.dataset.val))); });
-  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = ['write', 'cdn', 'hit', 'fail'].includes(key) ? SS[k][key] + ' %' : key === 'sms' ? SS[k][key] + '/s' : ['write'].includes(key) ? SS[k][key] + ' %' : key === 'bots' ? '×' + SS[k][key] : SS[k][key]; });
+  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = ['write', 'cdn', 'hit', 'fail'].includes(key) ? SS[k][key] + ' %' : key === 'sms' ? SS[k][key] + '/s' : key === 'ttl' ? SS[k][key] + ' s' : ['write'].includes(key) ? SS[k][key] + ' %' : key === 'bots' ? '×' + SS[k][key] : SS[k][key]; });
   $$('input[type=range]').forEach(fillRange);
   const c = CORES[SS[2].cores];
   $('#coreReadout').textContent = `${SS[2].cores} cœurs · ${c.ram} de RAM · environ ${fmt(c.price)} € · tient ${fmt(c.cap)} fans`;
@@ -2041,6 +2354,7 @@ function syncControls() {
   $('#bugBtn').textContent = SS[14].bug ? 'Nouvelle version sans bug' : 'Glisser un bug dans la nouvelle version';
   $('#bugBtn').setAttribute('aria-pressed', String(!!SS[14].bug));
   k8sHints();
+  phase5Hints();
   $('#smsDownBtn').textContent = SS[12].smsDown ? 'Rétablir le fournisseur SMS' : 'Couper le fournisseur SMS';
   $('#smsDownBtn').setAttribute('aria-pressed', String(!!SS[12].smsDown));
   const lid = SS[0].closed;
@@ -2065,6 +2379,16 @@ $('#killPodBtn').addEventListener('click', () => { if (step !== 13) goTo(13, { s
 $('#killNodeBtn').addEventListener('click', () => { if (step !== 13) goTo(13, { scroll: true }); killNode(); computeLoads(); liveUpdate(); });
 $('#deployBtn').addEventListener('click', () => { if (step !== 14) goTo(14, { scroll: true }); startDeploy(); liveUpdate(); });
 $('#bugBtn').addEventListener('click', () => { SS[14].bug = !SS[14].bug; if (step !== 14) goTo(14, { scroll: true }); else refresh(); });
+const toggleSlow = k => { if (step !== k) goTo(k, { scroll: true }); DEP.slow = !DEP.slow; logEv(DEP.slow ? 'Service places ralenti : 2,5 s par appel, capacité ÷4.' : 'Service places réparé.'); computeLoads(); liveUpdate(); };
+$('#depSlowBtn').addEventListener('click', () => toggleSlow(15));
+$('#depSlowBtn2').addEventListener('click', () => toggleSlow(17));
+$('#killPodBtn2').addEventListener('click', () => { if (step !== 17) goTo(17, { scroll: true }); killPod(); computeLoads(); liveUpdate(); });
+$('#regDownBtn').addEventListener('click', () => {
+  if (step !== 16) goTo(16, { scroll: true });
+  REG.down = !REG.down; REG.t = 0; REG.promoted = false;
+  logEv(REG.down ? 'Région Paris hors service.' : 'Région Paris rétablie.');
+  if (gl) applyLayout(); computeLoads(); liveUpdate();
+});
 $('#flushBtn').addEventListener('click', () => { if (step !== 9) goTo(9, { scroll: true }); CH.warm = 0; computeLoads(); liveUpdate(); });
 $('#scnSeg').addEventListener('click', e => {
   const b = e.target.closest('button[data-scn]'); if (!b) return;
