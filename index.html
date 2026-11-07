@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Billetterie : scaler une infra web en 8 étapes | Salle Comble</title>
-<meta name="description" content="Simulation 3D interactive d'une billetterie de concerts : ouverture des ventes, pannes, latence et erreurs en direct. 8 étapes, du laptop du dev à la base répliquée.">
+<title>Billetterie : scaler une infra web en 11 étapes | Salle Comble</title>
+<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting contre les bots. Ouverture des ventes, pannes, latence et erreurs en direct.">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Gptimus">
 <meta name="theme-color" content="#111214">
@@ -24,7 +24,7 @@
 <meta name="twitter:title" content="Monter une infra qui tient la charge · Salle Comble">
 <meta name="twitter:description" content="Lance l'ouverture des ventes, coupe un serveur, regarde ce qui casse et ajoute la pièce qui manque. Un simulateur 3D du scaling d'une infrastructure web.">
 <meta name="twitter:image" content="https://gptimus.github.io/salle-comble/og.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 8 étapes | Salle Comble", "description": "Simulation 3D interactive d'une billetterie de concerts : ouverture des ventes, pannes, latence et erreurs en direct. 8 étapes, du laptop du dev à la base répliquée.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 11 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting contre les bots. Ouverture des ventes, pannes, latence et erreurs en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
@@ -89,7 +89,7 @@ svg.ico { width: 1em; height: 1em; flex: none; }
 .inv-note { display: flex; gap: 10px; align-items: center; padding: 12px 16px; font-size: 14px; }
 .inv-note .mk { color: var(--red); }
 
-.stepnav { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
+.stepnav { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
 .stepnav button { border: 0; border-right: 1px solid var(--hatch); background: transparent; text-align: left; padding: 8px 10px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0; transition: background-color .2s; }
 .stepnav button:last-child { border-right: 0; }
 .stepnav button b { font-family: var(--font-cond); font-stretch: 62%; font-weight: 850; font-size: 34px; line-height: 1; }
@@ -262,9 +262,9 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 @media (max-width: 1100px) {
   .cover-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .stepnav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .stepnav button:nth-child(4) { border-right: 0; }
-  .stepnav button:nth-child(-n+4) { border-bottom: 1px solid var(--hatch); }
+  .stepnav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .stepnav button:nth-child(6) { border-right: 0; }
+  .stepnav button:nth-child(-n+6) { border-bottom: 1px solid var(--hatch); }
 }
 @media (max-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 16px; }
@@ -287,7 +287,7 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
   .navbox button { width: 38px; height: 38px; }
   #recBtn { display: none; }
   .verdict-box { min-width: 0; }
-  .spark, .sparklg, .m-p50 { display: none; }
+  .spark, .sparklg, .m-p50, #mBlkWrap { display: none; }
   .mtr { padding: 3px 9px 4px; gap: 0 8px; }
   .mtr b { font-size: 15px; }
   .ctlcol { flex: 1 1 auto; gap: 6px; }
@@ -329,6 +329,9 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
     <symbol id="p-dns" viewBox="0 0 64 64"><g fill="none" stroke="#111214" stroke-width="2"><circle cx="32" cy="28" r="17" fill="#fff"/><ellipse cx="32" cy="28" rx="17" ry="6.5"/><ellipse cx="32" cy="28" rx="7" ry="17"/><path d="M32 45v12M24 57h16"/></g></symbol>
     <symbol id="p-laptop" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M17 14h30v22H17z"/><path d="M10 44 17 36h30l7 8z"/></g><path d="M21 18h22v14H21z" fill="#E7E9EC"/></symbol>
     <symbol id="p-users" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2"><circle cx="24" cy="22" r="6"/><path d="M13 46c0-7 5-12 11-12s11 5 11 12z"/><circle cx="41" cy="25" r="5"/><path d="M33 46c1-6 4-10 8-10 5 0 9 4 9 10z"/></g></symbol>
+    <symbol id="p-cdn" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M8 42v5c0 4.4 10.7 8 24 8s24-3.6 24-8v-5"/><ellipse cx="32" cy="42" rx="24" ry="8"/><path d="M14 33l7-3.5 7 3.5-7 3.5z"/><path d="M14 33v7l7 3.5v-7zM21 36.5v7l7-3.5v-7z"/><path d="M36 33l7-3.5 7 3.5-7 3.5z"/><path d="M36 33v7l7 3.5v-7zM43 36.5v7l7-3.5v-7z"/><path d="M25 22l7-3.5 7 3.5-7 3.5z"/><path d="M25 22v7l7 3.5v-7zM32 25.5v7l7-3.5v-7z"/></g><path d="M8 42c0 4.4 10.7 8 24 8s24-3.6 24-8" fill="none" stroke="#1E4FD8" stroke-width="2"/></symbol>
+    <symbol id="p-cache" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M10 36 32 25 54 36 32 47z"/><path d="M10 36v7l22 11v-7z"/><path d="M32 47v7l22-11v-7z"/></g><g fill="#E3EAFB" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M17 34.5v-12l4-2v12z"/><path d="M24 31v-12l4-2v12z"/><path d="M31 27.5v-12l4-2v12z"/><path d="M38 24v-12l4-2v12z"/></g><circle cx="26" cy="47.5" r="1.8" fill="#1E4FD8"/></symbol>
+    <symbol id="p-gw" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M16 44 32 36 48 44 32 52z"/><path d="M16 44v6l16 8v-6z"/><path d="M32 52v6l16-8v-6z"/></g><g fill="none" stroke="#111214" stroke-width="3" stroke-linecap="round"><path d="M32 44V20"/><path d="M32 22 14 18M32 22l16-7M32 22l5 13"/></g><circle cx="32" cy="20" r="2.5" fill="#1E4FD8"/></symbol>
     <symbol id="m-ok" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M6.8 11.4 9.7 14.2 15.4 8.2"/></symbol>
     <symbol id="m-warn" viewBox="0 0 22 22"><path d="M11 2.5 20 18.5H2z"/><path d="M11 8.5v4.5M11 15.6v.4"/></symbol>
     <symbol id="m-bad" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M7.5 7.5l7 7M14.5 7.5l-7 7"/></symbol>
@@ -338,11 +341,11 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 <header class="cover gutter">
   <div class="wrap">
-    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-08 · FR</span></div>
+    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-11 · FR</span></div>
     <div class="cover-grid">
       <div>
         <h1>Monter une infra <span class="hl">qui tient</span> la charge</h1>
-        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Huit étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
+        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Onze étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
         <div class="dodont">
           <div class="dd bad">
             <svg class="scene" viewBox="0 0 240 96" aria-hidden="true"><g><use href="#p-users" x="4" y="16" width="64" height="64"/><use href="#p-users" x="30" y="24" width="56" height="56"/></g><path d="M86 52h62" stroke="#111214" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/><use href="#p-server" x="148" y="14" width="72" height="72"/><g stroke="#D7261B" stroke-width="3" stroke-linecap="round"><path d="M200 18l18 18M218 18l-18 18"/></g></svg>
@@ -355,14 +358,17 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
         </div>
       </div>
       <aside class="inventory" aria-label="Contenu de l'infrastructure finale">
-        <h2>Contenu <span>étape 8</span></h2>
+        <h2>Contenu <span>étape 11</span></h2>
         <ul class="inv">
           <li><svg><use href="#p-dns"/></svg><div><div class="q">1×</div><div class="n">DNS multi-IP</div></div></li>
+          <li><svg><use href="#p-cdn"/></svg><div><div class="q">1×</div><div class="n">CDN (fichiers)</div></div></li>
           <li><svg><use href="#p-lb"/></svg><div><div class="q">3×</div><div class="n">Load balancer</div></div></li>
-          <li><svg><use href="#p-server"/></svg><div><div class="q">12×</div><div class="n">Serveur applicatif</div></div></li>
+          <li><svg><use href="#p-gw"/></svg><div><div class="q">1×</div><div class="n">Passerelle · rate limit</div></div></li>
+          <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Serveur applicatif</div></div></li>
+          <li><svg><use href="#p-cache"/></svg><div><div class="q">1×</div><div class="n">Cache Redis</div></div></li>
           <li><svg><use href="#p-dbm"/></svg><div><div class="q">1×</div><div class="n">Base primaire (écritures)</div></div></li>
           <li><svg><use href="#p-db"/></svg><div><div class="q">4×</div><div class="n">Réplica (lectures)</div></div></li>
-          <li><svg><use href="#p-users"/></svg><div><div class="q">50 000</div><div class="n">Fans simultanés</div></div></li>
+          <li><svg><use href="#p-users"/></svg><div><div class="q">50 000</div><div class="n">Fans, plus 400 000 bots</div></div></li>
         </ul>
         <div class="inv-note"><svg class="mk"><use href="#m-bad"/></svg><span>Non inclus&nbsp;: le laptop du dev. Ne pas utiliser en production.</span></div>
       </aside>
@@ -495,6 +501,60 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
       <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="7">–</b></p>
     </section>
 
+    <section class="step" id="etape-9" data-step="8">
+      <div class="head"><span class="big" aria-hidden="true">9</span><div><h2>Un CDN pour les fichiers qui ne changent pas</h2><div class="parts"><span class="part"><svg><use href="#p-cdn"/></svg>1× CDN</span></div></div></div>
+      <p class="lead">Chaque page de concert charge des photos, le plan de salle, le JavaScript et les polices. Ces fichiers sont les mêmes pour tous les fans, et pourtant chaque serveur applicatif les renvoie des milliers de fois par minute.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Dans ce modèle, 60&nbsp;% du travail des serveurs consiste à renvoyer ces fichiers. Les serveurs saturent sans même toucher la base.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution</b><p>Un CDN garde une copie de ces fichiers dans des centaines de points de présence (PoP), près des fans. Le fan les reçoit du PoP le plus proche, plus vite, et la requête n'arrive jamais jusqu'aux load balancers.</p></div></div>
+      </div>
+      <div class="tags"><span class="tag">Cloudflare</span><span class="tag">CloudFront</span><span class="tag">Fastly</span><span class="tag">Akamai</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Monte la part servie par le CDN</div><div class="ctl-b">
+        <div class="ctl-row"><label for="r-cdn-8">Fichiers servis par le CDN</label><input type="range" id="r-cdn-8" min="0" max="95" step="5" data-step="8" data-key="cdn"><output data-out="8-cdn"></output></div>
+        <div class="ctl-row"><label for="r-apps-8">Serveurs applicatifs</label><input type="range" id="r-apps-8" min="2" max="16" step="1" data-step="8" data-key="apps"><output data-out="8-apps"></output></div>
+      </div></div>
+      <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Limite</b><p>Le CDN ne sert que ce qui est identique pour tout le monde. Les places restantes, le panier et le paiement passent toujours par les serveurs. Regarde la base&nbsp;: le CDN ne la soulage pas du tout.</p></div></div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="8">–</b></p>
+    </section>
+
+    <section class="step" id="etape-10" data-step="9">
+      <div class="head"><span class="big" aria-hidden="true">10</span><div><h2>Un cache en mémoire devant la base</h2><div class="parts"><span class="part"><svg><use href="#p-cache"/></svg>1× Cache Redis</span></div></div></div>
+      <p class="lead">80&nbsp;000 fans regardent la même page de concert. À chaque fois, un réplica relit les mêmes lignes&nbsp;: date, salle, artistes, tarifs.</p>
+      <div class="pnl">
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · cache-aside</b><p>L'application demande d'abord à Redis, qui garde les réponses en mémoire. S'il l'a (hit), c'est réglé en une milliseconde. Sinon (miss), elle lit la base et range la réponse dans Redis avec une durée de vie (TTL).</p></div></div>
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>À ne pas cacher</b><p>Le nombre de places restantes change à chaque seconde pendant une vente. Le lire dans un cache, c'est vendre deux fois la même place. La base reste la source de vérité pour tout ce qui se vend.</p></div></div>
+      </div>
+      <div class="tags"><span class="tag">Redis</span><span class="tag">Valkey</span><span class="tag">Memcached</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Règle le cache</div><div class="ctl-b">
+        <div class="ctl-row"><label for="r-hit-9">Taux de hit</label><input type="range" id="r-hit-9" min="0" max="99" step="1" data-step="9" data-key="hit"><output data-out="9-hit"></output></div>
+        <div class="ctl-row"><label for="r-apps-9">Serveurs applicatifs</label><input type="range" id="r-apps-9" min="2" max="32" step="1" data-step="9" data-key="apps"><output data-out="9-apps"></output></div>
+        <div class="ctl-row"><button class="btn" id="flushBtn" type="button">Faire expirer tout le cache</button><span class="hint" id="flushHint">Cache chaud.</span></div>
+      </div></div>
+      <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Piège · cache stampede</b><p>Quand une clé très demandée expire, des milliers de requêtes la ratent en même temps et frappent la base ensemble. Remèdes&nbsp;: des TTL décalés au hasard, un seul recalcul à la fois (verrou), un rafraîchissement avant l'expiration.</p></div></div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="9">–</b></p>
+    </section>
+
+    <section class="step" id="etape-11" data-step="10">
+      <div class="head"><span class="big" aria-hidden="true">11</span><div><h2>Rate limiting contre les bots</h2><div class="parts"><span class="part"><svg><use href="#p-gw"/></svg>1× Passerelle</span></div></div></div>
+      <p class="lead">Ouverture des ventes d'une tournée. Des bots de revendeurs envoient des milliers de requêtes par seconde pour rafler les meilleures places. Ici, ils pèsent 8 fois le trafic des vrais fans.</p>
+      <div class="pnl">
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · token bucket</b><p>Une passerelle (API gateway) donne à chaque IP ou compte un seau de jetons qui se remplit à vitesse fixe. Chaque requête consomme un jeton. Seau vide&nbsp;: la passerelle répond 429 tout de suite, sans déranger les serveurs.</p></div></div>
+      </div>
+      <pre class="term"><span class="pr">&gt;</span> GET /concerts/tournee-2027/places
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30</pre>
+      <div class="tags"><span class="tag">Nginx limit_req</span><span class="tag">Envoy</span><span class="tag">Kong</span><span class="tag">Cloudflare</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Règle la limite</div><div class="ctl-b">
+        <div class="ctl-row"><label for="r-bots-10">Bots revendeurs</label><input type="range" id="r-bots-10" min="0" max="20" step="1" data-step="10" data-key="bots"><output data-out="10-bots"></output></div>
+        <div class="seg" data-step="10" data-key="limit" role="group" aria-label="Limite de requêtes par IP">
+          <button type="button" data-val="none">Aucune</button><button type="button" data-val="100">100 / min</button><button type="button" data-val="20">20 / min</button><button type="button" data-val="5">5 / min</button>
+        </div>
+        <p class="hint" id="limitHint"></p>
+      </div></div>
+      <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Limite</b><p>Les bots refusés coûtent encore aux load balancers&nbsp;: c'est eux qui cèdent ensuite. Et les bots changent d'IP&nbsp;: il faut aussi limiter par compte, et filtrer plus tôt, au niveau du CDN.</p></div></div>
+      <p class="cap">Charge maximale de ce montage, avec 8 fois plus de bots que de fans&nbsp;: <b data-cap="10">–</b></p>
+    </section>
+
   </main>
 
   <aside class="stage" id="stage" aria-label="Planche 3D de l'infrastructure">
@@ -510,7 +570,7 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
       </div>
       <div class="box verdict-box">
         <div class="verdict st-ok" id="verdict">OK</div>
-        <div class="mtr" id="mtr"><span class="m-p50">Médian <b id="mP50">–</b></span><span>p99 <b id="mP99">–</b></span><span>Erreurs <b id="mErr">–</b></span></div>
+        <div class="mtr" id="mtr"><span class="m-p50">Médian <b id="mP50">–</b></span><span>p99 <b id="mP99">–</b></span><span>Erreurs <b id="mErr">–</b></span><span id="mBlkWrap" hidden>Bots bloqués <b id="mBlk">–</b></span></div>
         <svg class="spark" id="spark" viewBox="0 0 240 40" preserveAspectRatio="none" role="img" aria-label="Charge et erreurs sur la dernière minute"></svg>
         <div class="legend sparklg"><span><i style="background:var(--ink)"></i>Charge · 1 min</span><span><i style="background:var(--red)"></i>Erreurs</span></div>
         <div class="bneck" id="bneck"></div>
@@ -557,6 +617,11 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
             <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Le temps de réponse grimpe avant les premières erreurs</span></td><td>File d'attente qui se remplit sur la pièce la plus chargée</td><td>Ajouter de la capacité avant 70&nbsp;% de charge, pas après</td><td><a class="go" href="#etape-2" data-go="1">→ 2</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Base saturée, surtout en écriture ou en volume</span></td><td>Serveur de base unique</td><td>Sharding&nbsp;: découper les données (simple en NoSQL, délicat en SQL)</td><td><a class="go" href="#etape-7" data-go="6">→ 7</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Base saturée par les lectures</span></td><td>Serveur de base unique</td><td>Un primaire pour écrire, des réplicas pour lire</td><td><a class="go" href="#etape-8" data-go="7">→ 8</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Serveurs saturés par les images, le JS, les polices</span></td><td>Fichiers statiques servis par l'application</td><td>Un CDN qui les sert depuis des points de présence proches des fans</td><td><a class="go" href="#etape-9" data-go="8">→ 9</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Réplicas saturés par les mêmes lectures</span></td><td>Lectures répétées à l'identique</td><td>Un cache Redis devant la base (cache-aside, avec TTL)</td><td><a class="go" href="#etape-10" data-go="9">→ 10</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Pic soudain sur la base quand le cache expire</span></td><td>Cache stampede</td><td>TTL décalés, un seul recalcul à la fois, rafraîchir avant expiration</td><td><a class="go" href="#etape-10" data-go="9">→ 10</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Trafic ×10 à l'ouverture des ventes, venu de quelques IP</span></td><td>Bots revendeurs</td><td>Rate limiting par IP et par compte, réponses 429</td><td><a class="go" href="#etape-11" data-go="10">→ 11</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Des vrais fans reçoivent des 429</span></td><td>Limite trop stricte</td><td>Relever la limite, compter par compte plutôt que par IP</td><td><a class="go" href="#etape-11" data-go="10">→ 11</a></td></tr>
           </tbody>
         </table>
       </div>
@@ -565,26 +630,32 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
     <div class="block">
       <div class="sec-h"><span class="big" aria-hidden="true">max</span><div><h2>Charge maximale par montage</h2><p>Capacité calculée par le modèle de cette page, avec les meilleurs réglages de chaque étape. Échelle logarithmique&nbsp;: chaque graduation vaut dix fois la précédente.</p></div></div>
       <div class="ladder" id="ladder"></div>
-      <p class="note">Modèle simplifié&nbsp;: un serveur applicatif sert environ 5&nbsp;000 clients simultanés, une base 20&nbsp;000, un load balancer 300&nbsp;000. Les vrais chiffres dépendent du code, des requêtes et du matériel.</p>
+      <p class="note">Modèle simplifié&nbsp;: un serveur applicatif sert environ 5&nbsp;000 fans simultanés, une base 20&nbsp;000, un cache Redis 400&nbsp;000, un load balancer 300&nbsp;000. Les fichiers statiques font 60&nbsp;% du travail des serveurs. Les vrais chiffres dépendent du code, des requêtes et du matériel.</p>
     </div>
 
     <div class="block">
-      <div class="sec-h"><svg class="mk" style="width:76px;height:76px;stroke-width:1.6" aria-hidden="true"><use href="#m-ok"/></svg><div><h2>Montage terminé</h2><p>Chaque couche se scale indépendamment. Mais lance «&nbsp;Ouverture des ventes&nbsp;» sur l'étape 8&nbsp;: 30 fois la charge en deux secondes, et même ce montage cède. Pour tenir des millions de fans, il faudra une file d'attente virtuelle, du rate limiting contre les bots, des queues pour les paiements et les billets, et des serveurs qui s'ajoutent tout seuls.</p></div></div>
+      <div class="sec-h"><svg class="mk" style="width:76px;height:76px;stroke-width:1.6" aria-hidden="true"><use href="#m-ok"/></svg><div><h2>Montage terminé</h2><p>Chaque couche se scale indépendamment. Mais lance «&nbsp;Ouverture des ventes&nbsp;» sur l'étape 11&nbsp;: 30 fois la charge en deux secondes, et même ce montage cède. Pour tenir des millions de fans, il faudra une file d'attente virtuelle, des queues pour les paiements et l'envoi des billets, et des serveurs qui s'ajoutent tout seuls.</p></div></div>
       <div class="exploded">
         <div class="ex"><svg><use href="#p-users"/></svg><span class="q">∞</span><span class="n">Fans</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-dns"/></svg><span class="q">1×</span><span class="n">DNS multi-IP</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-cdn"/></svg><span class="q">1×</span><span class="n">CDN</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-lb"/></svg><span class="q">3×</span><span class="n">Load balancers</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
-        <div class="ex"><svg><use href="#p-server"/></svg><span class="q">12×</span><span class="n">Serveurs applicatifs</span></div>
+        <div class="ex"><svg><use href="#p-gw"/></svg><span class="q">1×</span><span class="n">Passerelle</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-server"/></svg><span class="q">8×</span><span class="n">Serveurs applicatifs</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-cache"/></svg><span class="q">1×</span><span class="n">Cache Redis</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-dbm"/></svg><span class="q">1×</span><span class="n">Primaire</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-db"/></svg><span class="q">4×</span><span class="n">Réplicas</span></div>
       </div>
     </div>
-    <div class="endmark"><span>Salle Comble · INFRA-08</span><span>Fin de la notice</span></div>
+    <div class="endmark"><span>Salle Comble · INFRA-11</span><span>Fin de la notice</span></div>
   </div>
 </section>
 
@@ -600,7 +671,12 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 const MK = t => `<svg class="mk"><use href="#m-${t}"/></svg>`;
 
 /* ---------- Modèle ---------- */
-const CAP = { laptop: 50, srv: 500, app: 5000, slow: 2500, db: 20000, lb: 300000 };
+const CAP = { laptop: 50, srv: 500, app: 5000, slow: 2500, db: 20000, lb: 300000, cdn: 5000000, cache: 400000, gw: 3000000 };
+/* Part du travail des serveurs applicatifs qui consiste à renvoyer des fichiers identiques pour tous (images, JS, plan de salle). */
+const STATIC = 0.6;
+/* Rate limiting : part des requêtes de bots qui passent, part des vrais fans bloqués à tort. */
+const LIMITS = { none: { pass: 1, fp: 0 }, '100': { pass: 0.1, fp: 0 }, '20': { pass: 0.02, fp: 0.01 }, '5': { pass: 0.005, fp: 0.15 } };
+const APPVIS = 12;
 const CORES = {
   8:  { cap: 500,  price: 200,  ram: '32 Go' },
   16: { cap: 1000, price: 650,  ram: '64 Go' },
@@ -616,39 +692,49 @@ const STEPS = [
   { short: 'DNS',          title: 'DNS et plusieurs LB',         u: 19000 },
   { short: 'Sharding',     title: 'Découper la base',            u: 50000 },
   { short: 'Réplication',  title: 'Primaire et réplicas',        u: 50000 },
+  { short: 'CDN',          title: 'CDN pour les fichiers',       u: 50000 },
+  { short: 'Cache',        title: 'Cache Redis',                 u: 80000 },
+  { short: 'Rate limit',   title: 'Rate limiting',               u: 50000 },
 ];
 const DEFAULTS = [
   { closed: false }, {}, { cores: 32 }, {},
   { apps: 4, algo: 'rr' }, { apps: 6 },
   { apps: 12, mode: 'copies', shards: 3 },
   { apps: 12, replicas: 4, write: 5 },
+  { apps: 8, replicas: 4, write: 5, cdn: 0 },
+  { apps: 8, replicas: 3, write: 5, cdn: 90, hit: 0 },
+  { apps: 8, replicas: 4, write: 5, cdn: 90, hit: 90, bots: 8, limit: 'none' },
 ];
 const CHART = [
   { closed: false }, {}, { cores: 64 }, {},
   { apps: 4, algo: 'lat' }, { apps: 6 },
   { apps: 16, mode: 'shard', shards: 4 },
   { apps: 16, replicas: 6, write: 5 },
+  { apps: 16, replicas: 6, write: 5, cdn: 95 },
+  { apps: 32, replicas: 6, write: 5, cdn: 95, hit: 95 },
+  { apps: 32, replicas: 6, write: 5, cdn: 95, hit: 95, bots: 8, limit: '20' },
 ];
 const SS = DEFAULTS.map(o => ({ ...o }));
 const LBN = 3;
 
 /* Pannes simulées. app : App 1 (ou le serveur unique) ne répond plus. lb : LB 1 tombe. db : la base (ou le primaire) tourne au tiers de sa capacité. */
-const NOCH = { app: false, lb: false, db: false };
-const CH = { app: false, lb: false, db: false };
+/* warm : remplissage du cache Redis (0 juste après une expiration, 1 une fois réchauffé). */
+const NOCH = { app: false, lb: false, db: false, warm: 1 };
+const CH = { app: false, lb: false, db: false, warm: 1 };
 const CH_FROM = { app: 1, lb: 4, db: 3 };
-let DOWN = new Set(), LOST = 0;
+let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0;
 function loadsFor(k, s, u, ch = NOCH, out = null) {
-  const m = {}, down = new Set(); let lost = 0;
+  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0;
   const dbc = i => (ch.db && i === 0 ? CAP.db / 3 : CAP.db);
-  const apps = n => {
+  const apps = (n, uu = u) => {
     if (ch.app && n === 1) { m.app0 = Infinity; return; }
     if (ch.app) down.add('app0');
     const live = ch.app ? n - 1 : n;
-    for (let i = ch.app ? 1 : 0; i < n; i++) m['app' + i] = u / live / CAP.app;
+    for (let i = ch.app ? 1 : 0; i < n; i++) m['app' + i] = uu / live / CAP.app;
   };
-  const lbs = () => {
+  const lbs = (uu = u) => {
     if (ch.lb) { down.add('lb0'); lost = 1 / LBN; }
-    for (let i = ch.lb ? 1 : 0; i < LBN; i++) m['lb' + i] = u / LBN / CAP.lb;
+    for (let i = ch.lb ? 1 : 0; i < LBN; i++) m['lb' + i] = uu / LBN / CAP.lb;
   };
   switch (k) {
     case 0: m.laptop = s.closed ? Infinity : u / CAP.laptop; break;
@@ -669,11 +755,26 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
     case 5: lbs(); apps(s.apps); m.db0 = u / dbc(0); break;
     case 6: lbs(); apps(s.apps);
       for (let i = 0; i < s.shards; i++) m['db' + i] = s.mode === 'copies' ? u / dbc(i) : u / s.shards / dbc(i); break;
-    case 7: { lbs(); apps(s.apps); const w = s.write / 100, R = s.replicas;
-      m.db0 = w * u / dbc(0);
-      for (let i = 0; i < R; i++) m['rep' + i] = ((1 - w) * u / R + 0.5 * w * u) / CAP.db; break; }
+    case 7: case 8: case 9: case 10: {
+      const w = s.write / 100, R = s.replicas;
+      const h = k >= 8 ? s.cdn / 100 : 0, f = 1 - STATIC * h;
+      const hc = k >= 9 ? s.hit / 100 * ch.warm : 0;
+      let uIn = u, uOut = u;
+      if (k === 10) {
+        const L = LIMITS[s.limit];
+        fp = L.fp; blocked = 1 - L.pass;
+        uIn = u * (1 + s.bots); uOut = u * (1 - fp) + u * s.bots * L.pass;
+        m.gw0 = uIn * f / CAP.gw;
+      }
+      lbs(uIn * f); apps(s.apps, uOut * f);
+      if (k >= 8) m.cdn0 = uIn * STATIC * h / CAP.cdn;
+      if (k >= 9) m.cache0 = (1 - w) * uOut / CAP.cache;
+      m.db0 = w * uOut / dbc(0);
+      for (let i = 0; i < R; i++) m['rep' + i] = ((1 - w) * uOut * (1 - hc) / R + 0.5 * w * uOut) / CAP.db;
+      break;
+    }
   }
-  if (out) { out.down = down; out.lost = lost; }
+  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; }
   return m;
 }
 const maxOf = m => { let best = 0, id = null; for (const k in m) if (m[k] > best || id === null) { best = m[k]; id = k; } return { load: best, id }; };
@@ -690,7 +791,10 @@ function neckNameFor(k, id) {
   if (id.startsWith('app')) return k <= 2 ? 'Serveur' : 'Serveurs applicatifs';
   if (id.startsWith('lb')) return 'Load balancer';
   if (id.startsWith('rep')) return 'Réplicas';
-  if (id === 'db0' && k === 7) return 'Primaire';
+  if (id === 'cdn0') return 'CDN';
+  if (id === 'cache0') return 'Cache Redis';
+  if (id === 'gw0') return 'Passerelle';
+  if (id === 'db0' && k >= 7) return 'Primaire';
   if (id.startsWith('db')) return 'Base de données';
   return id;
 }
@@ -716,21 +820,25 @@ function layout(k) {
   if (k === 2) { node('app0', 'big' + s.cores, [0, 0, 0], 'Serveur ' + s.cores + ' cœurs'); edge('users', 'app0'); }
   if (k === 3) { node('app0', 'srv2', [-0.6, 0, 0], 'Serveur app'); node('db0', 'db', [3.2, 0, 0], 'Base'); edge('users', 'app0'); edge('app0', 'db0'); }
   if (k >= 4) {
-    const NA = s.apps, ax = k === 4 ? 0 : 0.3, P = appPos(NA, ax), group = NA > 4;
+    const NA = k >= 7 ? Math.min(s.apps, APPVIS) : s.apps, ax = k === 4 ? 0 : 0.3, P = appPos(NA, ax), group = NA > 4, gw = k === 10;
     for (let i = 0; i < NA; i++) {
       let lab = 'App ' + (i + 1);
       if (k === 4 && i === 1) lab = 'App 2 · lent';
       const slowShown = k === 4 && i === 1;
-      node('app' + i, 'srv2', P[i], group && !slowShown ? (i === 0 ? 'Apps ×' + NA : '') : lab, { hideLabel: group && i !== 0 && !slowShown });
+      node('app' + i, 'srv2', P[i], group && !slowShown ? (i === 0 ? 'Apps ×' + s.apps : '') : lab, { hideLabel: group && i !== 0 && !slowShown });
     }
     if (k === 4) { node('lb0', 'lb', [-3.8, 0, 0], 'Load balancer'); edge('users', 'lb0'); for (let i = 0; i < NA; i++) edge('lb0', 'app' + i); }
     else {
       const z = colZ(LBN, 2.7);
       node('dns', 'dns', [-6.2, 2.8, -3.4], 'DNS · 3 IP');
-      for (let i = 0; i < LBN; i++) { node('lb' + i, 'lb', [-4.4, 0, z[i]], 'LB ' + (i + 1), { hideLabel: i !== 0 }); edge('users', 'lb' + i); edge('dns', 'lb' + i, { dashed: true }); for (let j = 0; j < NA; j++) edge('lb' + i, 'app' + j, { faint: true }); }
+      const lbx = gw ? -4.9 : -4.4;
+      for (let i = 0; i < LBN; i++) { node('lb' + i, 'lb', [lbx, 0, z[i]], 'LB ' + (i + 1), { hideLabel: i !== 0 }); edge('users', 'lb' + i); edge('dns', 'lb' + i, { dashed: true }); if (gw) edge('lb' + i, 'gw0'); else for (let j = 0; j < NA; j++) edge('lb' + i, 'app' + j, { faint: true }); }
+      if (gw) { node('gw0', 'gw', [-2.4, 0, 0], 'Passerelle · rate limit'); for (let j = 0; j < NA; j++) edge('gw0', 'app' + j, { faint: true }); }
+      if (k >= 8) { node('cdn0', 'cdn', [-6.4, 0, 4.6], 'CDN'); edge('users', 'cdn0'); }
       edge('users', 'dns', { dashed: true });
     }
-    const dbx = NA > 6 ? 4.4 : 4.2;
+    const dbx = k >= 9 ? 5.9 : NA > 6 ? 4.4 : 4.2;
+    if (k >= 9) { node('cache0', 'cache', [3.2, 0, 0], 'Cache Redis'); for (let j = 0; j < NA; j++) edge('app' + j, 'cache0', { faint: true }); }
     if (k <= 5) { node('db0', 'db', [dbx + 0.3, 0, 0], 'Base'); for (let i = 0; i < NA; i++) edge('app' + i, 'db0', { faint: NA > 4 }); }
     if (k === 6) {
       const S = s.shards, z = colZ(S, 2.1);
@@ -741,10 +849,10 @@ function layout(k) {
         if (s.mode === 'copies') for (let j = i + 1; j < S; j++) edge('db' + i, 'db' + j, { dashed: true, lift: 0.9 });
       }
     }
-    if (k === 7) {
+    if (k >= 7) {
       const R = s.replicas, z = colZ(R, 2.0);
       node('db0', 'dbm', [dbx, 0, 0], 'Primaire');
-      for (let i = 0; i < R; i++) { node('rep' + i, 'db', [dbx + 3.1, 0, z[i]], 'Réplica ' + (i + 1), { hideLabel: R > 4 && i !== 0 }); edge('db0', 'rep' + i, { dashed: true, lift: 0.4 }); for (let j = 0; j < NA; j++) edge('app' + j, 'rep' + i, { faint: true, lift: 2.2 }); }
+      for (let i = 0; i < R; i++) { node('rep' + i, 'db', [dbx + 3.1, 0, z[i]], 'Réplica ' + (i + 1), { hideLabel: R > 4 && i !== 0 }); edge('db0', 'rep' + i, { dashed: true, lift: 0.4 }); if (k >= 9) edge('cache0', 'rep' + i, { faint: true, lift: 1.2 }); else for (let j = 0; j < NA; j++) edge('app' + j, 'rep' + i, { faint: true, lift: 2.2 }); }
       for (let j = 0; j < NA; j++) edge('app' + j, 'db0', { faint: true });
     }
   }
@@ -789,7 +897,7 @@ function scnLabel() {
    s'accumule dans sa file (en secondes d'attente). Pleine (2 s), elle abandonne l'excédent.
    Sous 100 %, la file se vide au rythme de la capacité libre. */
 const TIMEOUT = 2;
-const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8 };
+const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8, cdn: 15, cache: 1, gw: 2 };
 const SIM = { q: {}, drop: {}, p50: 0, p99: 0, err: 0, hist: [], histAcc: 0 };
 const kindOf = id => id.replace(/\d+$/, '');
 function simStep(dt) {
@@ -797,7 +905,7 @@ function simStep(dt) {
   for (const id in q) if (!(id in loads)) delete q[id];
   for (const id in drop) if (!(id in loads)) delete drop[id];
   const tiers = {};
-  const w7 = step === 7 ? SS[7].write / 100 : 0;
+  const S = SS[step], w7 = step >= 7 ? S.write / 100 : 0, hc = step >= 9 ? S.hit / 100 * CH.warm : 0;
   for (const id in loads) {
     const L = loads[id];
     let b = q[id] || 0, d = 0, lat;
@@ -808,15 +916,19 @@ function simStep(dt) {
       lat = BASE_MS[kindOf(id)] / (1 - Math.min(L, 0.92)) + b * 1000;
     }
     q[id] = b; drop[id] = d;
-    let kind = kindOf(id), wt = 1;
-    if (step === 7 && (kind === 'db' || kind === 'rep')) { wt = kind === 'db' ? w7 : (1 - w7) / SS[7].replicas; kind = 'data'; }
-    const t = tiers[kind] || (tiers[kind] = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit: step === 7 && kind === 'data' });
+    let kind = kindOf(id), wt = 1, explicit = false;
+    if (kind === 'cdn') continue;
+    if (step >= 7 && (kind === 'db' || kind === 'rep')) { wt = kind === 'db' ? w7 : (1 - w7) * (1 - hc) / S.replicas; kind = 'data'; explicit = true; }
+    if (kind === 'cache') { wt = 1 - w7; explicit = true; }
+    const t = tiers[kind] || (tiers[kind] = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit });
     t.n++; t.w += wt; t.ok += wt * (1 - d); t.lat += wt * lat; t.max = Math.max(t.max, lat);
   }
-  let ok = 1 - LOST, p50 = 0, p99 = 0;
+  let ok = (1 - LOST) * (1 - FP), p50 = 0, p99 = 0;
   for (const k in tiers) {
-    const t = tiers[k], W = t.explicit ? 1 : t.w;
-    ok *= t.ok / W; p50 += t.lat / W; p99 += t.max * 3;
+    const t = tiers[k];
+    if (t.explicit) { ok *= t.ok + (1 - t.w); p50 += t.lat; }
+    else { ok *= t.ok / t.w; p50 += t.lat / t.w; }
+    p99 += t.max * 3;
   }
   SIM.err = Math.min(1, Math.max(0, 1 - ok));
   SIM.p50 = Math.min(p50, TIMEOUT * 1000); SIM.p99 = Math.min(p99, TIMEOUT * 1000);
@@ -830,7 +942,7 @@ function simStep(dt) {
 function computeLoads() {
   const out = {};
   loads = loadsFor(step, SS[step], U, CH, out);
-  DOWN = out.down; LOST = out.lost;
+  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked;
 }
 
 /* ---------- Three.js ---------- */
@@ -995,7 +1107,36 @@ function mkUsers() {
   g.userData = { led: null, h: 0.6 };
   return g;
 }
+function mkCDN() {
+  const g = new THREE.Group(), led = ledMat();
+  const base = lined(new THREE.CylinderGeometry(1.05, 1.05, 0.14, 40), M.body, { hull: true }); base.position.y = 0.07; g.add(base);
+  const r = new THREE.Mesh(new THREE.CylinderGeometry(1.065, 1.065, 0.04, 40), led); r.position.y = 0.16; g.add(r);
+  for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.4, b = lined(box(0.42, 0.42, 0.42), M.body); b.position.set(Math.cos(a) * 0.58, 0.39, Math.sin(a) * 0.58); g.add(b); }
+  g.userData = { led, h: 0.6 };
+  return g;
+}
+function mkCache() {
+  const g = new THREE.Group(), led = ledMat();
+  const b = lined(box(1.5, 0.3, 1.0), M.body); b.position.y = 0.15; g.add(b);
+  const l = new THREE.Mesh(box(0.75, 0.06, 0.03), led); l.position.set(-0.3, 0.15, 0.515); g.add(l);
+  for (let i = 0; i < 5; i++) { const f = lined(box(0.08, 0.42, 0.8), M.lb); f.position.set(-0.56 + i * 0.28, 0.51, 0); g.add(f); }
+  g.userData = { led, h: 0.72 };
+  return g;
+}
+function mkGW() {
+  const g = new THREE.Group(), led = ledMat();
+  const b = lined(box(1.0, 0.5, 0.8), M.body); b.position.y = 0.25; g.add(b);
+  const l = new THREE.Mesh(box(0.5, 0.06, 0.03), led); l.position.set(0, 0.36, 0.415); g.add(l);
+  const post = lined(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 12), M.body); post.position.y = 0.75; g.add(post);
+  const arms = new THREE.Group(); arms.position.y = 0.92; g.add(arms);
+  for (let i = 0; i < 3; i++) { const h = new THREE.Group(); h.rotation.y = i / 3 * Math.PI * 2; const a = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.7, 10), M.inkFill); a.rotation.z = Math.PI / 2; a.position.x = 0.35; h.add(a); arms.add(h); }
+  g.userData = { led, h: 1.0, spin: arms };
+  return g;
+}
 function build(type) {
+  if (type === 'cdn') return mkCDN();
+  if (type === 'cache') return mkCache();
+  if (type === 'gw') return mkGW();
   if (type === 'laptop') return mkLaptop();
   if (type === 'srv1') return mkServer(1, false);
   if (type.startsWith('big')) return mkServer({ 8: 2, 16: 3, 32: 5, 64: 7 }[+type.slice(3)], true);
@@ -1090,11 +1231,13 @@ const randInt = n => Math.floor(Math.random() * n);
 function kindColor(kind, fig) {
   if (kind === 'read' || kind === 'dns') return TOK.blue;
   if (kind === 'sync') return TOK.hatch;
+  if (kind === 'static') return new THREE.Color('#1E8F5A');
+  if (kind === 'bot') return new THREE.Color('#E8A900');
   if (kind === 'sticky') return new THREE.Color(STICKY[fig % STICKY.length]);
   return TOK.ink;
 }
 function pickApp(s, fig) {
-  const N = s.apps;
+  const N = step >= 7 ? Math.min(s.apps, APPVIS) : s.apps;
   const live = i => (DOWN.has('app' + i) && N > 1 ? (i + 1) % N : i);
   if (step !== 4) return live(randInt(N));
   if (s.algo === 'rr') return live((rrCounter++) % N);
@@ -1120,10 +1263,24 @@ function makeRoute() {
       const write = Math.random() < 0.15, d = randInt(s.shards);
       return { hops: ['users', lb, app, 'db' + d], kind: write ? 'write' : 'read', fig, sync: write ? { from: 'db' + d, to: Array.from({ length: s.shards }, (_, i) => 'db' + i).filter(x => x !== 'db' + d) } : null };
     }
-    case 7: {
-      const lb = 'lb' + randInt(LBN), app = 'app' + randInt(s.apps);
-      if (Math.random() < s.write / 100) return { hops: ['users', lb, app, 'db0'], kind: 'write', fig, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
-      return { hops: ['users', lb, app, 'rep' + randInt(s.replicas)], kind: 'read', fig, liftLast: 2.2 };
+    case 7: case 8: case 9: case 10: {
+      if (step >= 8 && Math.random() < STATIC * s.cdn / 100) return { hops: ['users', 'cdn0', 'users'], kind: 'static', fig, small: true };
+      const pre = ['users', 'lb' + randInt(LBN)];
+      let kind = null, block = null;
+      if (step === 10) {
+        const L = LIMITS[s.limit];
+        if (Math.random() < s.bots / (1 + s.bots)) { kind = 'bot'; if (Math.random() > L.pass) block = 'gw0'; }
+        else if (Math.random() < L.fp) block = 'gw0';
+        pre.push('gw0');
+      }
+      pre.push('app' + pickApp(s, fig));
+      if (Math.random() < s.write / 100) return { hops: [...pre, 'db0'], kind: kind || 'write', fig, block, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
+      const rep = 'rep' + randInt(s.replicas);
+      if (step >= 9) {
+        if (Math.random() < s.hit / 100 * CH.warm) return { hops: [...pre, 'cache0'], kind: kind || 'read', fig, block };
+        return { hops: [...pre, 'cache0', rep], kind: kind || 'read', fig, block, liftLast: 0.6 };
+      }
+      return { hops: [...pre, rep], kind: kind || 'read', fig, block, liftLast: 2.2 };
     }
   }
 }
@@ -1162,6 +1319,10 @@ function updateParticles(dt) {
     p.t += dt / p.dur;
     if (p.t >= 1) {
       const dest = p.hops[p.seg + 1], L = loads[dest] || 0;
+      if (p.block === dest) {
+        p.dying = 0.5; p.color.copy(p.kind === 'bot' ? TOK.hatch : TOK.red); pMesh.setColorAt(p.idx, p.color);
+        p.at = endpoint(dest, p, new THREE.Vector3()) || new THREE.Vector3(); continue;
+      }
       const dr = DOWN.has(dest) || !isFinite(L) ? 1 : (SIM.drop[dest] || 0);
       if (p.failAt === dest || Math.random() < dr) {
         p.dying = 0.5; p.color.copy(TOK.red); pMesh.setColorAt(p.idx, p.color);
@@ -1283,15 +1444,18 @@ function legendFor(k) {
   if (k === 4 && SS[4].algo === 'sticky') return it('conic-gradient(var(--blue) 0 33%, var(--red) 0 66%, var(--ink) 0)', 'Une couleur par fan');
   if (k <= 4) return it('var(--ink)', 'Requête') + it('var(--red)', 'Perdue');
   if (k === 5) return it('var(--ink)', 'Requête') + it('var(--blue)', 'Question au DNS') + it('var(--red)', 'Perdue');
+  if (k === 8) return it('#1E8F5A', 'Fichier servi par le CDN') + it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--red)', 'Perdue');
+  if (k === 10) return it('var(--blue)', 'Fan') + it('#E8A900', 'Bot') + it('var(--hatch)', 'Bloqué · 429') + it('var(--red)', 'Perdue');
   return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--hatch)', 'Synchro') + it('var(--red)', 'Perdue');
 }
 function fillRange(r) { r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); }
-const mtr = { p50: $('#mP50'), p99: $('#mP99'), err: $('#mErr'), spark: $('#spark'), scn: $('#scnState') };
+const mtr = { p50: $('#mP50'), p99: $('#mP99'), err: $('#mErr'), spark: $('#spark'), scn: $('#scnState'), blk: $('#mBlk'), blkWrap: $('#mBlkWrap') };
 const fmtMs = ms => ms >= TIMEOUT * 1000 - 1 ? '> 2 s' : ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 const fmtErr = e => e < 0.0005 ? '0 %' : e < 0.1 ? (e * 100).toFixed(1).replace('.', ',') + ' %' : Math.round(e * 100) + ' %';
 function updateU() { U = Math.max(1, Math.min(U_MAX, Ubase * scnMult(SCN.mode, SCN.t))); }
 let liveAcc = 0;
 function advanceSim(dt) {
+  if (CH.warm < 1) CH.warm = Math.min(1, CH.warm + dt / 15);
   if (SCN.mode !== 'manual') {
     SCN.t += dt;
     if (SCN.mode === 'rush' && SCN.t > RUSH_END) { SCN.mode = 'manual'; SCN.t = 0; syncSim(); }
@@ -1336,6 +1500,9 @@ function liveUpdate() {
   mtr.err.textContent = fmtErr(SIM.err);
   mtr.err.className = SIM.err >= 0.02 ? 'st-bad' : '';
   mtr.scn.textContent = scnLabel();
+  mtr.blkWrap.hidden = step !== 10;
+  if (step === 10) mtr.blk.textContent = fmtErr(BLOCKED);
+  if (step === 9) $('#flushHint').textContent = CH.warm < 1 ? 'Cache rempli à ' + Math.round(CH.warm * 100) + ' % : les réplicas encaissent les lectures ratées.' : 'Cache chaud.';
   drawSpark();
   if (gl) {
     figCount = Math.max(3, Math.min(FIG_MAX, Math.round(3 + 7.5 * Math.log10(U))));
@@ -1371,7 +1538,7 @@ function goTo(k, opts = {}) {
   step = k;
   if (changed || opts.force) {
     Ubase = STEPS[k].u; hud.users.value = sliderFromU(Ubase); rrCounter = 0;
-    CH.app = CH.lb = CH.db = false; SIM.q = {}; SIM.drop = {};
+    CH.app = CH.lb = CH.db = false; CH.warm = 1; SIM.q = {}; SIM.drop = {};
     if (gl) clearParticles();
   }
   $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === k));
@@ -1388,7 +1555,7 @@ function goTo(k, opts = {}) {
 /* ---------- Contrôles ---------- */
 function syncControls() {
   $$('.seg[data-step]').forEach(seg => { const k = +seg.dataset.step, key = seg.dataset.key; seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(String(SS[k][key]) === b.dataset.val))); });
-  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = key === 'write' ? SS[k][key] + ' %' : SS[k][key]; });
+  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = ['write', 'cdn', 'hit'].includes(key) ? SS[k][key] + ' %' : key === 'bots' ? '×' + SS[k][key] : SS[k][key]; });
   $$('input[type=range]').forEach(fillRange);
   const c = CORES[SS[2].cores];
   $('#coreReadout').textContent = `${SS[2].cores} cœurs · ${c.ram} de RAM · environ ${fmt(c.price)} € · tient ${fmt(c.cap)} fans`;
@@ -1398,6 +1565,8 @@ function syncControls() {
   $('#modeHint').textContent = (SS[6].mode === 'copies'
     ? 'Chaque écriture est recopiée sur toutes les bases : 3 serveurs, 3 fois le travail. Chaque copie garde la même charge. On gagne la haute disponibilité, pas de capacité.'
     : 'Les données sont découpées : fans 1 à 500 sur une base, 501 à 1000 sur l\'autre. Les shards ne se parlent pas : 10 shards, environ 10 fois plus de clients.').replace(/ :/g, ' :');
+  const lh = { none: 'Aucune limite : chaque requête de bot arrive jusqu\'aux serveurs.', '100': '100 requêtes par minute et par IP : 90 % du trafic des bots est refusé, aucun fan n\'est gêné.', '20': '20 par minute : 98 % des bots refusés, 1 % des fans qui rafraîchissent vite reçoivent un 429.', '5': '5 par minute : presque tous les bots refusés, mais 15 % des vrais fans aussi. Trop strict.' };
+  $('#limitHint').textContent = lh[SS[10].limit];
   const lid = SS[0].closed;
   $('#lidBtn').textContent = lid ? 'Rouvrir le laptop' : 'Fermer le laptop';
   $('#lidHint').textContent = lid ? 'Site hors ligne : toutes les requêtes échouent.'.replace(' :', ' :') : 'Le site répond.';
@@ -1414,6 +1583,7 @@ document.addEventListener('input', e => {
 });
 $('#lidBtn').addEventListener('click', () => { SS[0].closed = !SS[0].closed; if (step !== 0) goTo(0); else refresh(); });
 hud.users.addEventListener('input', () => { Ubase = uFromSlider(+hud.users.value); updateU(); computeLoads(); liveUpdate(); });
+$('#flushBtn').addEventListener('click', () => { if (step !== 9) goTo(9, { scroll: true }); CH.warm = 0; computeLoads(); liveUpdate(); });
 $('#scnSeg').addEventListener('click', e => {
   const b = e.target.closest('button[data-scn]'); if (!b) return;
   SCN.mode = b.dataset.scn; SCN.t = 0; syncSim(); updateU(); computeLoads(); liveUpdate();
