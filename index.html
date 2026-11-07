@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Billetterie : scaler une infra web en 11 étapes | Salle Comble</title>
-<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting contre les bots. Ouverture des ventes, pannes, latence et erreurs en direct.">
+<title>Billetterie : scaler une infra web en 13 étapes | Salle Comble</title>
+<meta name="description" content="Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues et notifications. Pics, pannes, latence et erreurs en direct.">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Gptimus">
 <meta name="theme-color" content="#111214">
@@ -24,7 +24,7 @@
 <meta name="twitter:title" content="Monter une infra qui tient la charge · Salle Comble">
 <meta name="twitter:description" content="Lance l'ouverture des ventes, coupe un serveur, regarde ce qui casse et ajoute la pièce qui manque. Un simulateur 3D du scaling d'une infrastructure web.">
 <meta name="twitter:image" content="https://gptimus.github.io/salle-comble/og.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 11 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting contre les bots. Ouverture des ventes, pannes, latence et erreurs en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Monter une infra qui tient la charge", "headline": "Billetterie : scaler une infra web en 13 étapes | Salle Comble", "description": "Simulation 3D d'une billetterie de concerts : load balancer, réplicas, CDN, cache Redis, rate limiting, queues et notifications. Pics, pannes, latence et erreurs en direct.", "url": "https://gptimus.github.io/salle-comble/", "inLanguage": "fr", "image": "https://gptimus.github.io/salle-comble/og.png", "learningResourceType": "Guide interactif", "educationalLevel": "Débutant", "isAccessibleForFree": true, "teaches": ["Scaling vertical", "Scaling horizontal", "Load balancer", "Round robin", "Sessions persistantes", "DNS multi-IP", "Single point of failure", "Sharding", "Réplication primaire / réplicas", "Files d'attente et latence", "Tolérance aux pannes", "CDN", "Cache Redis", "Cache stampede", "Rate limiting", "Queues et workers", "Dead letter queue", "Notifications fan-out", "Idempotence"], "about": ["System design", "DevOps", "Infrastructure web"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
@@ -89,10 +89,10 @@ svg.ico { width: 1em; height: 1em; flex: none; }
 .inv-note { display: flex; gap: 10px; align-items: center; padding: 12px 16px; font-size: 14px; }
 .inv-note .mk { color: var(--red); }
 
-.stepnav { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
+.stepnav { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); border: var(--line) solid var(--ink); background: var(--sheet); }
 .stepnav button { border: 0; border-right: 1px solid var(--hatch); background: transparent; text-align: left; padding: 8px 10px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0; transition: background-color .2s; }
 .stepnav button:last-child { border-right: 0; }
-.stepnav button b { font-family: var(--font-cond); font-stretch: 62%; font-weight: 850; font-size: 34px; line-height: 1; }
+.stepnav button b { font-family: var(--font-cond); font-stretch: 62%; font-weight: 850; font-size: 30px; line-height: 1; }
 .stepnav button span { font-size: 13px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stepnav button:hover { background: var(--tint); }
 .stepnav button[aria-current="step"] { background: var(--ink); color: var(--sheet); }
@@ -208,6 +208,8 @@ pre.term .pr { color: var(--caution); }
 .mtr b.st-bad { background: transparent; color: var(--red); }
 .spark { display: block; width: 100%; height: 40px; border-top: 1px solid var(--ink); }
 .sparklg { padding: 2px 12px 5px; }
+.qline b { font-size: 15px; }
+.qline[hidden] { display: none; }
 .ctlcol { flex: 1 1 320px; max-width: 560px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .ctlcol .loadbox { flex: none; max-width: none; }
 .simbox { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
@@ -262,9 +264,9 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 @media (max-width: 1100px) {
   .cover-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .stepnav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .stepnav button:nth-child(6) { border-right: 0; }
-  .stepnav button:nth-child(-n+6) { border-bottom: 1px solid var(--hatch); }
+  .stepnav { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .stepnav button:nth-child(7) { border-right: 0; }
+  .stepnav button:nth-child(-n+7) { border-bottom: 1px solid var(--hatch); }
 }
 @media (max-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 16px; }
@@ -332,6 +334,8 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
     <symbol id="p-cdn" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M8 42v5c0 4.4 10.7 8 24 8s24-3.6 24-8v-5"/><ellipse cx="32" cy="42" rx="24" ry="8"/><path d="M14 33l7-3.5 7 3.5-7 3.5z"/><path d="M14 33v7l7 3.5v-7zM21 36.5v7l7-3.5v-7z"/><path d="M36 33l7-3.5 7 3.5-7 3.5z"/><path d="M36 33v7l7 3.5v-7zM43 36.5v7l7-3.5v-7z"/><path d="M25 22l7-3.5 7 3.5-7 3.5z"/><path d="M25 22v7l7 3.5v-7zM32 25.5v7l7-3.5v-7z"/></g><path d="M8 42c0 4.4 10.7 8 24 8s24-3.6 24-8" fill="none" stroke="#1E4FD8" stroke-width="2"/></symbol>
     <symbol id="p-cache" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M10 36 32 25 54 36 32 47z"/><path d="M10 36v7l22 11v-7z"/><path d="M32 47v7l22-11v-7z"/></g><g fill="#E3EAFB" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M17 34.5v-12l4-2v12z"/><path d="M24 31v-12l4-2v12z"/><path d="M31 27.5v-12l4-2v12z"/><path d="M38 24v-12l4-2v12z"/></g><circle cx="26" cy="47.5" r="1.8" fill="#1E4FD8"/></symbol>
     <symbol id="p-gw" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M16 44 32 36 48 44 32 52z"/><path d="M16 44v6l16 8v-6z"/><path d="M32 52v6l16-8v-6z"/></g><g fill="none" stroke="#111214" stroke-width="3" stroke-linecap="round"><path d="M32 44V20"/><path d="M32 22 14 18M32 22l16-7M32 22l5 13"/></g><circle cx="32" cy="20" r="2.5" fill="#1E4FD8"/></symbol>
+    <symbol id="p-queue" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M4 38 36 22 60 34 28 50z"/><path d="M4 38v4l24 12v-4zM28 50v4l32-16v-4z"/></g><g fill="#E3EAFB" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M14 33l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/><path d="M26 27l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/><path d="M38 21l5-2.5 5 2.5v5l-5 2.5-5-2.5z"/></g><path d="M50 17l6 3" stroke="#1E4FD8" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="p-bell" viewBox="0 0 64 64"><g fill="#fff" stroke="#111214" stroke-width="2" stroke-linejoin="round"><path d="M20 42V30a12 12 0 0 1 24 0v12l4 5H16z"/><path d="M28 51a4 4 0 0 0 8 0"/></g><path d="M32 14v4" stroke="#111214" stroke-width="2" stroke-linecap="round"/><g fill="none" stroke="#1E4FD8" stroke-width="2" stroke-linecap="round"><path d="M48 22c3 3 4 7 3 11"/><path d="M16 22c-3 3-4 7-3 11"/></g></symbol>
     <symbol id="m-ok" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M6.8 11.4 9.7 14.2 15.4 8.2"/></symbol>
     <symbol id="m-warn" viewBox="0 0 22 22"><path d="M11 2.5 20 18.5H2z"/><path d="M11 8.5v4.5M11 15.6v.4"/></symbol>
     <symbol id="m-bad" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><path d="M7.5 7.5l7 7M14.5 7.5l-7 7"/></symbol>
@@ -341,11 +345,11 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
 
 <header class="cover gutter">
   <div class="wrap">
-    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-11 · FR</span></div>
+    <div class="bar"><span class="brand">Salle Comble</span><span>Notice d'assemblage · billetterie web</span><span class="code">INFRA-13 · FR</span></div>
     <div class="cover-grid">
       <div>
         <h1>Monter une infra <span class="hl">qui tient</span> la charge</h1>
-        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Onze étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
+        <p class="lead">La billetterie Salle Comble vend d'abord les places d'une petite salle de quartier, puis des tournées, puis des stades. Treize étapes, une pièce à la fois&nbsp;: à chaque étape, pousse la charge jusqu'à ce que quelque chose casse, puis ajoute la pièce qui manque.</p>
         <div class="dodont">
           <div class="dd bad">
             <svg class="scene" viewBox="0 0 240 96" aria-hidden="true"><g><use href="#p-users" x="4" y="16" width="64" height="64"/><use href="#p-users" x="30" y="24" width="56" height="56"/></g><path d="M86 52h62" stroke="#111214" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/><use href="#p-server" x="148" y="14" width="72" height="72"/><g stroke="#D7261B" stroke-width="3" stroke-linecap="round"><path d="M200 18l18 18M218 18l-18 18"/></g></svg>
@@ -358,7 +362,7 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
         </div>
       </div>
       <aside class="inventory" aria-label="Contenu de l'infrastructure finale">
-        <h2>Contenu <span>étape 11</span></h2>
+        <h2>Contenu <span>étape 13</span></h2>
         <ul class="inv">
           <li><svg><use href="#p-dns"/></svg><div><div class="q">1×</div><div class="n">DNS multi-IP</div></div></li>
           <li><svg><use href="#p-cdn"/></svg><div><div class="q">1×</div><div class="n">CDN (fichiers)</div></div></li>
@@ -366,6 +370,8 @@ td .go:hover { background: var(--ink); color: var(--sheet); }
           <li><svg><use href="#p-gw"/></svg><div><div class="q">1×</div><div class="n">Passerelle · rate limit</div></div></li>
           <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Serveur applicatif</div></div></li>
           <li><svg><use href="#p-cache"/></svg><div><div class="q">1×</div><div class="n">Cache Redis</div></div></li>
+          <li><svg><use href="#p-queue"/></svg><div><div class="q">4×</div><div class="n">Queue (réservations, email, SMS, push)</div></div></li>
+          <li><svg><use href="#p-server"/></svg><div><div class="q">8×</div><div class="n">Worker</div></div></li>
           <li><svg><use href="#p-dbm"/></svg><div><div class="q">1×</div><div class="n">Base primaire (écritures)</div></div></li>
           <li><svg><use href="#p-db"/></svg><div><div class="q">4×</div><div class="n">Réplica (lectures)</div></div></li>
           <li><svg><use href="#p-users"/></svg><div><div class="q">50 000</div><div class="n">Fans, plus 400 000 bots</div></div></li>
@@ -555,6 +561,55 @@ Retry-After: 30</pre>
       <p class="cap">Charge maximale de ce montage, avec 8 fois plus de bots que de fans&nbsp;: <b data-cap="10">–</b></p>
     </section>
 
+    <section class="step" id="etape-12" data-step="11">
+      <div class="head"><span class="big" aria-hidden="true">12</span><div><h2>Une queue pour les réservations</h2><div class="parts"><span class="part"><svg><use href="#p-queue"/></svg>1× Queue</span><span class="part"><svg><use href="#p-server"/></svg>8× Worker</span></div></div></div>
+      <p class="lead">Une réservation écrit dans le primaire et attend la réponse de la banque, pendant que le fan fixe son écran. Quand une date est annoncée, la part de réservations triple pendant quelques secondes. Les bots, réglés à l'étape 11, sont mis de côté ici.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>En mode synchrone, le primaire reçoit toutes les réservations à l'instant où elles arrivent. Lance le pic&nbsp;: au-delà de 2&nbsp;000 par seconde, il sature et les paiements échouent.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution</b><p>L'application dépose la réservation dans une queue et répond tout de suite «&nbsp;réservation reçue&nbsp;». Des workers vident la queue au rythme que la base supporte. Relance le pic&nbsp;: la queue se remplit, puis se vide. Le pic devient une attente, pas une panne.</p></div></div>
+      </div>
+      <pre class="term"><span class="pr">&gt;</span> POST /reservations
+HTTP/1.1 202 Accepted
+{"statut": "en_attente", "id": "R-48213"}</pre>
+      <div class="tags"><span class="tag">RabbitMQ</span><span class="tag">Kafka</span><span class="tag">Amazon SQS</span><span class="tag">Redis Streams</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Compare les deux modes</div><div class="ctl-b">
+        <div class="seg" data-step="11" data-key="mode" role="group" aria-label="Traitement des réservations">
+          <button type="button" data-val="sync">Synchrone</button><button type="button" data-val="queue">Via une queue</button>
+        </div>
+        <p class="hint" id="queueHint"></p>
+        <div class="ctl-row"><button class="btn" id="peakBtn" type="button">Lancer un pic de réservations (10 s)</button></div>
+        <div class="ctl-row"><label for="r-wk-11">Workers</label><input type="range" id="r-wk-11" min="1" max="16" step="1" data-step="11" data-key="workers"><output data-out="11-workers"></output></div>
+        <div class="ctl-row"><label for="r-w-11">Part de réservations</label><input type="range" id="r-w-11" min="5" max="80" step="5" data-step="11" data-key="write"><output data-out="11-write"></output></div>
+        <div class="ctl-row"><label for="r-fail-11">Paiements refusés</label><input type="range" id="r-fail-11" min="0" max="30" step="1" data-step="11" data-key="fail"><output data-out="11-fail"></output></div>
+      </div></div>
+      <div class="pnl">
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Combien de workers&nbsp;?</b><p>Chaque worker traite 200 réservations par seconde. Au-delà de 10, c'est le primaire qui sature à nouveau&nbsp;: on dimensionne les workers sur ce que la base encaisse, pas sur la taille de la queue.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Retries et dead letter queue</b><p>Banque indisponible ou paiement refusé&nbsp;: le worker réessaie avec un délai qui double à chaque fois (backoff). Après 3 essais, le message part dans une dead letter queue (DLQ) qu'une personne examine. Rien n'est perdu en silence.</p></div></div>
+        <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Limite</b><p>Une queue absorbe un pic, pas une surcharge permanente. Si les réservations arrivent plus vite que les workers ne les traitent, l'attente grandit sans fin. Pour une billetterie, la réponse est une salle d'attente virtuelle en amont, qui laisse entrer les fans par vagues.</p></div></div>
+      </div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="11">–</b></p>
+    </section>
+
+    <section class="step" id="etape-13" data-step="12">
+      <div class="head"><span class="big" aria-hidden="true">13</span><div><h2>Billet par email, SMS et push</h2><div class="parts"><span class="part"><svg><use href="#p-bell"/></svg>3× Canal</span><span class="part"><svg><use href="#p-queue"/></svg>3× Queue</span></div></div></div>
+      <p class="lead">Chaque réservation confirmée déclenche trois messages&nbsp;: le billet par email, un SMS de confirmation et une notification sur l'appli. Chaque fournisseur a sa propre limite&nbsp;: ici, le SMS n'accepte que 500 messages par seconde.</p>
+      <div class="pnl">
+        <div class="pn bad"><svg class="mk"><use href="#m-bad"/></svg><div><b>Problème</b><p>Avec une seule queue pour tous les messages, ils sortent dans l'ordre. Quand le SMS bloque, l'email et le push attendent derrière lui.</p></div></div>
+        <div class="pn ok"><svg class="mk"><use href="#m-ok"/></svg><div><b>Solution · fan-out</b><p>Le worker publie une seule fois l'événement «&nbsp;réservation confirmée&nbsp;» (pub/sub). Chaque canal s'y abonne avec sa propre queue et ses propres workers, et avance à son rythme.</p></div></div>
+      </div>
+      <div class="tags"><span class="tag">Kafka</span><span class="tag">SNS + SQS</span><span class="tag">Google Pub/Sub</span><span class="tag">Twilio</span><span class="tag">Firebase Cloud Messaging</span></div>
+      <div class="ctl"><div class="ctl-h"><svg class="mk"><use href="#m-hand"/></svg>Règle l'envoi</div><div class="ctl-b">
+        <div class="seg" data-step="12" data-key="fan" role="group" aria-label="Organisation des queues de notification">
+          <button type="button" data-val="shared">Une seule queue</button><button type="button" data-val="split">Une queue par canal</button>
+        </div>
+        <p class="hint" id="fanHint"></p>
+        <div class="ctl-row"><label for="r-sms-12">Limite du fournisseur SMS</label><input type="range" id="r-sms-12" min="100" max="3000" step="100" data-step="12" data-key="sms"><output data-out="12-sms"></output></div>
+        <div class="ctl-row"><button class="btn" id="smsDownBtn" type="button" aria-pressed="false">Couper le fournisseur SMS</button></div>
+      </div></div>
+      <div class="pn warn"><svg class="mk"><use href="#m-warn"/></svg><div><b>Idempotence</b><p>Un worker peut planter après avoir envoyé le SMS mais avant d'avoir confirmé le message à la queue. Le message sera relivré. Une clé d'idempotence (numéro de réservation + canal) évite d'envoyer deux fois le même billet.</p></div></div>
+      <p class="cap">Charge maximale de ce montage&nbsp;: <b data-cap="12">–</b></p>
+    </section>
+
   </main>
 
   <aside class="stage" id="stage" aria-label="Planche 3D de l'infrastructure">
@@ -571,6 +626,7 @@ Retry-After: 30</pre>
       <div class="box verdict-box">
         <div class="verdict st-ok" id="verdict">OK</div>
         <div class="mtr" id="mtr"><span class="m-p50">Médian <b id="mP50">–</b></span><span>p99 <b id="mP99">–</b></span><span>Erreurs <b id="mErr">–</b></span><span id="mBlkWrap" hidden>Bots bloqués <b id="mBlk">–</b></span></div>
+        <div class="mtr qline" id="qline" hidden></div>
         <svg class="spark" id="spark" viewBox="0 0 240 40" preserveAspectRatio="none" role="img" aria-label="Charge et erreurs sur la dernière minute"></svg>
         <div class="legend sparklg"><span><i style="background:var(--ink)"></i>Charge · 1 min</span><span><i style="background:var(--red)"></i>Erreurs</span></div>
         <div class="bneck" id="bneck"></div>
@@ -622,6 +678,11 @@ Retry-After: 30</pre>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Pic soudain sur la base quand le cache expire</span></td><td>Cache stampede</td><td>TTL décalés, un seul recalcul à la fois, rafraîchir avant expiration</td><td><a class="go" href="#etape-10" data-go="9">→ 10</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Trafic ×10 à l'ouverture des ventes, venu de quelques IP</span></td><td>Bots revendeurs</td><td>Rate limiting par IP et par compte, réponses 429</td><td><a class="go" href="#etape-11" data-go="10">→ 11</a></td></tr>
             <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Des vrais fans reçoivent des 429</span></td><td>Limite trop stricte</td><td>Relever la limite, compter par compte plutôt que par IP</td><td><a class="go" href="#etape-11" data-go="10">→ 11</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Erreurs au moment de payer pendant la vente</span></td><td>Primaire saturé par les réservations synchrones</td><td>Une queue et des workers qui écrivent au rythme de la base</td><td><a class="go" href="#etape-12" data-go="11">→ 12</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Les confirmations arrivent de plus en plus tard</span></td><td>Réservations plus rapides que les workers</td><td>Plus de workers sans dépasser la base, salle d'attente virtuelle en amont</td><td><a class="go" href="#etape-12" data-go="11">→ 12</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Des paiements en échec disparaissent</span></td><td>Aucun retry, aucune trace</td><td>Retries avec backoff, puis dead letter queue</td><td><a class="go" href="#etape-12" data-go="11">→ 12</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-warn"/></svg>Le billet par email arrive en retard à cause des SMS</span></td><td>Une seule queue pour tous les canaux</td><td>Fan-out&nbsp;: une queue et des workers par canal</td><td><a class="go" href="#etape-13" data-go="12">→ 13</a></td></tr>
+            <tr><td class="sym"><span><svg class="mk"><use href="#m-bad"/></svg>Un fan reçoit deux fois son billet</span></td><td>Message relivré après un crash du worker</td><td>Clé d'idempotence par réservation et par canal</td><td><a class="go" href="#etape-13" data-go="12">→ 13</a></td></tr>
           </tbody>
         </table>
       </div>
@@ -630,11 +691,11 @@ Retry-After: 30</pre>
     <div class="block">
       <div class="sec-h"><span class="big" aria-hidden="true">max</span><div><h2>Charge maximale par montage</h2><p>Capacité calculée par le modèle de cette page, avec les meilleurs réglages de chaque étape. Échelle logarithmique&nbsp;: chaque graduation vaut dix fois la précédente.</p></div></div>
       <div class="ladder" id="ladder"></div>
-      <p class="note">Modèle simplifié&nbsp;: un serveur applicatif sert environ 5&nbsp;000 fans simultanés, une base 20&nbsp;000, un cache Redis 400&nbsp;000, un load balancer 300&nbsp;000. Les fichiers statiques font 60&nbsp;% du travail des serveurs. Les vrais chiffres dépendent du code, des requêtes et du matériel.</p>
+      <p class="note">Modèle simplifié&nbsp;: un serveur applicatif sert environ 5&nbsp;000 fans simultanés, une base 20&nbsp;000, un cache Redis 400&nbsp;000, un load balancer 300&nbsp;000. Les fichiers statiques font 60&nbsp;% du travail des serveurs. Un worker traite 200 réservations par seconde, le primaire 2&nbsp;000. Les vrais chiffres dépendent du code, des requêtes et du matériel.</p>
     </div>
 
     <div class="block">
-      <div class="sec-h"><svg class="mk" style="width:76px;height:76px;stroke-width:1.6" aria-hidden="true"><use href="#m-ok"/></svg><div><h2>Montage terminé</h2><p>Chaque couche se scale indépendamment. Mais lance «&nbsp;Ouverture des ventes&nbsp;» sur l'étape 11&nbsp;: 30 fois la charge en deux secondes, et même ce montage cède. Pour tenir des millions de fans, il faudra une file d'attente virtuelle, des queues pour les paiements et l'envoi des billets, et des serveurs qui s'ajoutent tout seuls.</p></div></div>
+      <div class="sec-h"><svg class="mk" style="width:76px;height:76px;stroke-width:1.6" aria-hidden="true"><use href="#m-ok"/></svg><div><h2>Montage terminé</h2><p>Chaque couche se scale indépendamment. Mais lance «&nbsp;Ouverture des ventes&nbsp;» sur l'étape 13&nbsp;: 30 fois la charge en deux secondes, et même ce montage cède. Pour tenir des millions de fans, il faudra une salle d'attente virtuelle et des serveurs qui s'ajoutent tout seuls quand la charge monte.</p></div></div>
       <div class="exploded">
         <div class="ex"><svg><use href="#p-users"/></svg><span class="q">∞</span><span class="n">Fans</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
@@ -650,12 +711,18 @@ Retry-After: 30</pre>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-cache"/></svg><span class="q">1×</span><span class="n">Cache Redis</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-queue"/></svg><span class="q">1×</span><span class="n">Queue</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-server"/></svg><span class="q">8×</span><span class="n">Workers</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-dbm"/></svg><span class="q">1×</span><span class="n">Primaire</span></div>
         <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
         <div class="ex"><svg><use href="#p-db"/></svg><span class="q">4×</span><span class="n">Réplicas</span></div>
+        <svg class="arrow" viewBox="0 0 36 20" aria-hidden="true"><path d="M2 10h30m-6-6 6 6-6 6"/></svg>
+        <div class="ex"><svg><use href="#p-bell"/></svg><span class="q">3×</span><span class="n">Email, SMS, push</span></div>
       </div>
     </div>
-    <div class="endmark"><span>Salle Comble · INFRA-11</span><span>Fin de la notice</span></div>
+    <div class="endmark"><span>Salle Comble · INFRA-13</span><span>Fin de la notice</span></div>
   </div>
 </section>
 
@@ -677,6 +744,15 @@ const STATIC = 0.6;
 /* Rate limiting : part des requêtes de bots qui passent, part des vrais fans bloqués à tort. */
 const LIMITS = { none: { pass: 1, fp: 0 }, '100': { pass: 0.1, fp: 0 }, '20': { pass: 0.02, fp: 0.01 }, '5': { pass: 0.005, fp: 0.15 } };
 const APPVIS = 12;
+/* Queues : un fan en train d'acheter fait environ une réservation toutes les 10 s. Un worker traite 200 réservations/s.
+   Le primaire encaisse 2 000 écritures/s (CAP.db / 10). Fournisseurs : email 5 000/s, push 20 000/s, SMS réglable. */
+const WRK = 200, MAIL_CAP = 5000, PUSH_CAP = 20000;
+const ASYNC_KINDS = new Set(['q', 'wk', 'mail', 'sms', 'push']);
+const isAsync = id => ASYNC_KINDS.has(id.replace(/\d+$/, ''));
+const CHN = { mail: 'Email', sms: 'SMS', push: 'Push' };
+const QS = { main: 0, dlq: 0, rate: 0, wait: 0, cq: { mail: 0, sms: 0, push: 0 }, cw: { mail: 0, sms: 0, push: 0 }, shared: 0 };
+let ASYNC_IN = null;
+function resetQueues() { QS.main = QS.dlq = QS.rate = QS.wait = QS.shared = 0; for (const c in QS.cq) { QS.cq[c] = 0; QS.cw[c] = 0; } }
 const CORES = {
   8:  { cap: 500,  price: 200,  ram: '32 Go' },
   16: { cap: 1000, price: 650,  ram: '64 Go' },
@@ -695,6 +771,8 @@ const STEPS = [
   { short: 'CDN',          title: 'CDN pour les fichiers',       u: 50000 },
   { short: 'Cache',        title: 'Cache Redis',                 u: 80000 },
   { short: 'Rate limit',   title: 'Rate limiting',               u: 50000 },
+  { short: 'Queue',        title: 'Queue pour les réservations', u: 50000 },
+  { short: 'Notifications',title: 'Notifications par canal',     u: 50000 },
 ];
 const DEFAULTS = [
   { closed: false }, {}, { cores: 32 }, {},
@@ -704,6 +782,8 @@ const DEFAULTS = [
   { apps: 8, replicas: 4, write: 5, cdn: 0 },
   { apps: 8, replicas: 3, write: 5, cdn: 90, hit: 0 },
   { apps: 8, replicas: 4, write: 5, cdn: 90, hit: 90, bots: 8, limit: 'none' },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'sync', workers: 8, fail: 2 },
+  { apps: 8, replicas: 3, write: 20, cdn: 90, hit: 90, bots: 0, limit: 'none', mode: 'queue', workers: 8, fail: 2, sms: 500, fan: 'shared', smsDown: false },
 ];
 const CHART = [
   { closed: false }, {}, { cores: 64 }, {},
@@ -713,18 +793,20 @@ const CHART = [
   { apps: 16, replicas: 6, write: 5, cdn: 95 },
   { apps: 32, replicas: 6, write: 5, cdn: 95, hit: 95 },
   { apps: 32, replicas: 6, write: 5, cdn: 95, hit: 95, bots: 8, limit: '20' },
+  { apps: 32, replicas: 6, write: 60, cdn: 95, hit: 95, bots: 8, limit: '20', mode: 'queue', workers: 9, fail: 2 },
+  { apps: 32, replicas: 6, write: 20, cdn: 95, hit: 95, bots: 8, limit: '20', mode: 'queue', workers: 9, fail: 2, sms: 3000, fan: 'split', smsDown: false },
 ];
 const SS = DEFAULTS.map(o => ({ ...o }));
 const LBN = 3;
 
 /* Pannes simulées. app : App 1 (ou le serveur unique) ne répond plus. lb : LB 1 tombe. db : la base (ou le primaire) tourne au tiers de sa capacité. */
 /* warm : remplissage du cache Redis (0 juste après une expiration, 1 une fois réchauffé). */
-const NOCH = { app: false, lb: false, db: false, warm: 1 };
-const CH = { app: false, lb: false, db: false, warm: 1 };
+const NOCH = { app: false, lb: false, db: false, warm: 1, qBusy: false, peak: 0 };
+const CH = { app: false, lb: false, db: false, warm: 1, peak: 0 };
 const CH_FROM = { app: 1, lb: 4, db: 3 };
 let DOWN = new Set(), LOST = 0, FP = 0, BLOCKED = 0;
 function loadsFor(k, s, u, ch = NOCH, out = null) {
-  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0;
+  const m = {}, down = new Set(); let lost = 0, fp = 0, blocked = 0, asyncIn = null;
   const dbc = i => (ch.db && i === 0 ? CAP.db / 3 : CAP.db);
   const apps = (n, uu = u) => {
     if (ch.app && n === 1) { m.app0 = Infinity; return; }
@@ -755,12 +837,12 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
     case 5: lbs(); apps(s.apps); m.db0 = u / dbc(0); break;
     case 6: lbs(); apps(s.apps);
       for (let i = 0; i < s.shards; i++) m['db' + i] = s.mode === 'copies' ? u / dbc(i) : u / s.shards / dbc(i); break;
-    case 7: case 8: case 9: case 10: {
-      const w = s.write / 100, R = s.replicas;
+    case 7: case 8: case 9: case 10: case 11: case 12: {
+      const w = (k >= 11 && ch.peak > 0 ? Math.min(90, s.write * 3) : s.write) / 100, R = s.replicas;
       const h = k >= 8 ? s.cdn / 100 : 0, f = 1 - STATIC * h;
       const hc = k >= 9 ? s.hit / 100 * ch.warm : 0;
       let uIn = u, uOut = u;
-      if (k === 10) {
+      if (k >= 10) {
         const L = LIMITS[s.limit];
         fp = L.fp; blocked = 1 - L.pass;
         uIn = u * (1 + s.bots); uOut = u * (1 - fp) + u * s.bots * L.pass;
@@ -769,15 +851,27 @@ function loadsFor(k, s, u, ch = NOCH, out = null) {
       lbs(uIn * f); apps(s.apps, uOut * f);
       if (k >= 8) m.cdn0 = uIn * STATIC * h / CAP.cdn;
       if (k >= 9) m.cache0 = (1 - w) * uOut / CAP.cache;
-      m.db0 = w * uOut / dbc(0);
-      for (let i = 0; i < R; i++) m['rep' + i] = ((1 - w) * uOut * (1 - hc) / R + 0.5 * w * uOut) / CAP.db;
+      if (k >= 11 && s.mode === 'queue') {
+        const fl = s.fail / 100, wr = w * uOut * 0.1, capW = s.workers * WRK;
+        const arrival = wr * (1 + fl + fl * fl);
+        const consume = ch.qBusy ? capW : Math.min(arrival, capW);
+        m.db0 = consume * 10 / dbc(0);
+        for (let i = 0; i < R; i++) m['rep' + i] = ((1 - w) * uOut * (1 - hc) / R + 0.5 * consume * 10) / CAP.db;
+        m.q0 = ch === NOCH ? 0 : QS.wait / 10;
+        m.wk0 = arrival / capW;
+        if (k === 12) for (const c in CHN) m[c + '0'] = ch === NOCH ? 0 : (isFinite(QS.cw[c]) ? QS.cw[c] / 60 : 9);
+        asyncIn = { arrival, capW, fl, notif: k === 12, sms: s.sms, smsDown: !!s.smsDown, fan: s.fan };
+      } else {
+        m.db0 = w * uOut / dbc(0);
+        for (let i = 0; i < R; i++) m['rep' + i] = ((1 - w) * uOut * (1 - hc) / R + 0.5 * w * uOut) / CAP.db;
+      }
       break;
     }
   }
-  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; }
+  if (out) { out.down = down; out.lost = lost; out.fp = fp; out.blocked = blocked; out.async = asyncIn; }
   return m;
 }
-const maxOf = m => { let best = 0, id = null; for (const k in m) if (m[k] > best || id === null) { best = m[k]; id = k; } return { load: best, id }; };
+const maxOf = m => { let best = 0, id = null; for (const k in m) { if (isAsync(k)) continue; if (m[k] > best || id === null) { best = m[k]; id = k; } } return { load: best, id }; };
 function capacity(k, s) {
   if (k === 0 && s.closed) return 0;
   let lo = 1, hi = 1e8;
@@ -794,6 +888,7 @@ function neckNameFor(k, id) {
   if (id === 'cdn0') return 'CDN';
   if (id === 'cache0') return 'Cache Redis';
   if (id === 'gw0') return 'Passerelle';
+  if (id === 'db0' && k >= 11 && SS[k].mode === 'queue') return 'Primaire (via les workers)';
   if (id === 'db0' && k >= 7) return 'Primaire';
   if (id.startsWith('db')) return 'Base de données';
   return id;
@@ -820,7 +915,7 @@ function layout(k) {
   if (k === 2) { node('app0', 'big' + s.cores, [0, 0, 0], 'Serveur ' + s.cores + ' cœurs'); edge('users', 'app0'); }
   if (k === 3) { node('app0', 'srv2', [-0.6, 0, 0], 'Serveur app'); node('db0', 'db', [3.2, 0, 0], 'Base'); edge('users', 'app0'); edge('app0', 'db0'); }
   if (k >= 4) {
-    const NA = k >= 7 ? Math.min(s.apps, APPVIS) : s.apps, ax = k === 4 ? 0 : 0.3, P = appPos(NA, ax), group = NA > 4, gw = k === 10;
+    const NA = k >= 7 ? Math.min(s.apps, APPVIS) : s.apps, ax = k === 4 ? 0 : 0.3, P = appPos(NA, ax), group = NA > 4, gw = k >= 10;
     for (let i = 0; i < NA; i++) {
       let lab = 'App ' + (i + 1);
       if (k === 4 && i === 1) lab = 'App 2 · lent';
@@ -848,6 +943,13 @@ function layout(k) {
         for (let j = 0; j < NA; j++) edge('app' + j, 'db' + i, { faint: true });
         if (s.mode === 'copies') for (let j = i + 1; j < S; j++) edge('db' + i, 'db' + j, { dashed: true, lift: 0.9 });
       }
+    }
+    if (k >= 11 && s.mode === 'queue') {
+      node('q0', 'queue', [2.4, 0, 6.0], 'Queue');
+      node('wk0', 'srv1', [5.4, 0, 6.0], 'Workers');
+      for (let j = 0; j < NA; j++) edge('app' + j, 'q0', { faint: true });
+      edge('q0', 'wk0'); edge('wk0', 'db0', { lift: 0.3 });
+      if (k === 12) { const cz = [5.0, 6.8, 8.6]; Object.keys(CHN).forEach((c, i) => { node(c + '0', 'cq', [8.4, 0, cz[i]], CHN[c]); edge('wk0', c + '0', { faint: true }); }); }
     }
     if (k >= 7) {
       const R = s.replicas, z = colZ(R, 2.0);
@@ -897,17 +999,48 @@ function scnLabel() {
    s'accumule dans sa file (en secondes d'attente). Pleine (2 s), elle abandonne l'excédent.
    Sous 100 %, la file se vide au rythme de la capacité libre. */
 const TIMEOUT = 2;
-const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8, cdn: 15, cache: 1, gw: 2 };
+const BASE_MS = { laptop: 60, app: 45, lb: 2, db: 8, rep: 8, cdn: 15, cache: 1, gw: 2, q: 3 };
 const SIM = { q: {}, drop: {}, p50: 0, p99: 0, err: 0, hist: [], histAcc: 0 };
 const kindOf = id => id.replace(/\d+$/, '');
+/* Files asynchrones : la réponse au fan part tout de suite, le travail attend son tour. Rien n'est perdu, tout est retardé. */
+function asyncStep(dt) {
+  const A = ASYNC_IN;
+  if (!A) { QS.rate = 0; return; }
+  const out = QS.main > 1 ? A.capW : Math.min(A.arrival, A.capW);
+  QS.main = Math.max(0, QS.main + (A.arrival - out) * dt);
+  QS.rate = out; QS.wait = QS.main / Math.max(1, A.capW);
+  const tries = 1 + A.fl + A.fl * A.fl;
+  QS.dlq += out * Math.pow(A.fl, 3) / tries * dt;
+  if (!A.notif) return;
+  const n = out / tries;
+  const caps = { mail: MAIL_CAP, sms: A.smsDown ? 0 : A.sms, push: PUSH_CAP };
+  if (A.fan === 'split') {
+    for (const c in caps) {
+      const o = QS.cq[c] > 1 ? caps[c] : Math.min(n, caps[c]);
+      QS.cq[c] = Math.max(0, QS.cq[c] + (n - o) * dt);
+      QS.cw[c] = caps[c] > 0 ? QS.cq[c] / caps[c] : (QS.cq[c] > 1 ? Infinity : 0);
+    }
+  } else {
+    const thr = 3 * Math.min(caps.mail, caps.sms, caps.push), inR = 3 * n;
+    const o = QS.shared > 1 ? thr : Math.min(inR, thr);
+    QS.shared = Math.max(0, QS.shared + (inR - o) * dt);
+    const wt = thr > 0 ? QS.shared / thr : (QS.shared > 1 ? Infinity : 0);
+    for (const c in caps) { QS.cq[c] = QS.shared / 3; QS.cw[c] = wt; }
+  }
+}
 function simStep(dt) {
   const q = SIM.q, drop = SIM.drop;
   for (const id in q) if (!(id in loads)) delete q[id];
   for (const id in drop) if (!(id in loads)) delete drop[id];
   const tiers = {};
-  const S = SS[step], w7 = step >= 7 ? S.write / 100 : 0, hc = step >= 9 ? S.hit / 100 * CH.warm : 0;
+  const S = SS[step], w7 = step >= 7 ? S.write / 100 : 0, hc = step >= 9 ? S.hit / 100 * CH.warm : 0, QMODE = step >= 11 && S.mode === 'queue';
   for (const id in loads) {
     const L = loads[id];
+    if (isAsync(id)) {
+      q[id] = 0; drop[id] = 0;
+      if (kindOf(id) === 'q') { const t = tiers.q || (tiers.q = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit: true }); t.n++; t.w += w7; t.ok += w7; t.lat += w7 * BASE_MS.q; t.max = Math.max(t.max, BASE_MS.q); }
+      continue;
+    }
     let b = q[id] || 0, d = 0, lat;
     if (!isFinite(L)) { b = TIMEOUT; d = 1; lat = TIMEOUT * 1000; }
     else {
@@ -918,7 +1051,7 @@ function simStep(dt) {
     q[id] = b; drop[id] = d;
     let kind = kindOf(id), wt = 1, explicit = false;
     if (kind === 'cdn') continue;
-    if (step >= 7 && (kind === 'db' || kind === 'rep')) { wt = kind === 'db' ? w7 : (1 - w7) * (1 - hc) / S.replicas; kind = 'data'; explicit = true; }
+    if (step >= 7 && (kind === 'db' || kind === 'rep')) { wt = kind === 'db' ? (QMODE ? 0 : w7) : (1 - w7) * (1 - hc) / S.replicas; kind = 'data'; explicit = true; }
     if (kind === 'cache') { wt = 1 - w7; explicit = true; }
     const t = tiers[kind] || (tiers[kind] = { n: 0, w: 0, ok: 0, lat: 0, max: 0, explicit });
     t.n++; t.w += wt; t.ok += wt * (1 - d); t.lat += wt * lat; t.max = Math.max(t.max, lat);
@@ -941,8 +1074,9 @@ function simStep(dt) {
 }
 function computeLoads() {
   const out = {};
+  CH.qBusy = QS.main > 1;
   loads = loadsFor(step, SS[step], U, CH, out);
-  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked;
+  DOWN = out.down; LOST = out.lost; FP = out.fp; BLOCKED = out.blocked; ASYNC_IN = out.async;
 }
 
 /* ---------- Three.js ---------- */
@@ -1133,7 +1267,19 @@ function mkGW() {
   g.userData = { led, h: 1.0, spin: arms };
   return g;
 }
+function mkQueue(len) {
+  const g = new THREE.Group(), led = ledMat();
+  const plate = lined(box(len, 0.1, 0.8), M.body); plate.position.y = 0.05; g.add(plate);
+  for (const z of [-0.36, 0.36]) { const r = lined(box(len, 0.16, 0.06), M.body); r.position.set(0, 0.18, z); g.add(r); }
+  const l = new THREE.Mesh(box(len * 0.3, 0.05, 0.03), led); l.position.set(-len * 0.3, 0.05, 0.415); g.add(l);
+  const n = Math.round(len * 6), cubes = [];
+  for (let i = 0; i < n; i++) { const c = lined(box(0.13, 0.13, 0.4), M.lb); c.position.set(len / 2 - 0.14 - i * (len - 0.28) / Math.max(1, n - 1), 0.17, 0); c.visible = false; g.add(c); cubes.push(c); }
+  g.userData = { led, h: 0.3, cubes };
+  return g;
+}
 function build(type) {
+  if (type === 'queue') return mkQueue(2.4);
+  if (type === 'cq') return mkQueue(1.3);
   if (type === 'cdn') return mkCDN();
   if (type === 'cache') return mkCache();
   if (type === 'gw') return mkGW();
@@ -1233,6 +1379,7 @@ function kindColor(kind, fig) {
   if (kind === 'sync') return TOK.hatch;
   if (kind === 'static') return new THREE.Color('#1E8F5A');
   if (kind === 'bot') return new THREE.Color('#E8A900');
+  if (kind === 'notif') return new THREE.Color('#7A4BD6');
   if (kind === 'sticky') return new THREE.Color(STICKY[fig % STICKY.length]);
   return TOK.ink;
 }
@@ -1263,18 +1410,24 @@ function makeRoute() {
       const write = Math.random() < 0.15, d = randInt(s.shards);
       return { hops: ['users', lb, app, 'db' + d], kind: write ? 'write' : 'read', fig, sync: write ? { from: 'db' + d, to: Array.from({ length: s.shards }, (_, i) => 'db' + i).filter(x => x !== 'db' + d) } : null };
     }
-    case 7: case 8: case 9: case 10: {
+    case 7: case 8: case 9: case 10: case 11: case 12: {
+      const qm = step >= 11 && s.mode === 'queue';
+      if (qm && QS.rate > 0) {
+        const r = Math.random();
+        if (step === 12 && r < 0.2) return { hops: ['wk0', ['mail0', 'sms0', 'push0'][randInt(3)], 'users'], kind: 'notif', fig, small: true };
+        if (r < 0.32) return { hops: ['q0', 'wk0', 'db0'], kind: 'write', fig, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
+      }
       if (step >= 8 && Math.random() < STATIC * s.cdn / 100) return { hops: ['users', 'cdn0', 'users'], kind: 'static', fig, small: true };
       const pre = ['users', 'lb' + randInt(LBN)];
       let kind = null, block = null;
-      if (step === 10) {
+      if (step >= 10) {
         const L = LIMITS[s.limit];
         if (Math.random() < s.bots / (1 + s.bots)) { kind = 'bot'; if (Math.random() > L.pass) block = 'gw0'; }
         else if (Math.random() < L.fp) block = 'gw0';
         pre.push('gw0');
       }
       pre.push('app' + pickApp(s, fig));
-      if (Math.random() < s.write / 100) return { hops: [...pre, 'db0'], kind: kind || 'write', fig, block, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
+      if (Math.random() < s.write / 100) return qm ? { hops: [...pre, 'q0'], kind: kind || 'write', fig, block } : { hops: [...pre, 'db0'], kind: kind || 'write', fig, block, liftExtra: 0.4, sync: { from: 'db0', to: Array.from({ length: s.replicas }, (_, i) => 'rep' + i) } };
       const rep = 'rep' + randInt(s.replicas);
       if (step >= 9) {
         if (Math.random() < s.hit / 100 * CH.warm) return { hops: [...pre, 'cache0'], kind: kind || 'read', fig, block };
@@ -1379,6 +1532,11 @@ function tick(now) {
       if ((n.type === 'laptop' && SS[0].closed) || DOWN.has(id)) ud.led.color.copy(TOK.ink);
       else { loadColor(L || 0, ud.led.color); if (L >= 1 && !RM && Math.sin(clock * 10) > 0.2) ud.led.color.copy(TOK.sheet); }
     }
+    if (ud.cubes) {
+      const c = kindOf(id), back = c === 'q' ? QS.main : (QS.cq[c] || 0), N = ud.cubes.length;
+      const vis = back < 1 ? 0 : Math.min(N, Math.ceil(Math.log10(1 + back) * N / 5));
+      ud.cubes.forEach((cb, i) => { cb.visible = i < vis; });
+    }
     if (ud.lid) { const tgt = SS[0].closed ? Math.PI / 2 - 0.02 : -0.28; ud.lid.rotation.x += (tgt - ud.lid.rotation.x) * (1 - Math.exp(-dt * 7)); }
     if (ud.bob && !RM) { ud.bob.position.y = Math.sin(clock * 1.6) * 0.12; ud.bob.rotation.y += dt * 0.4; }
     if (ud.spin && !RM && !DOWN.has(id) && isFinite(L || 0)) ud.spin.rotation.y += dt * (0.6 + Math.min(3, (L || 0) * 3));
@@ -1415,11 +1573,21 @@ function placeLabels() {
     n.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
   }
 }
+const fmtWait = w => !isFinite(w) ? 'bloqué' : w < 1 ? '< 1 s' : w < 60 ? Math.round(w) + ' s' : w < 3600 ? Math.round(w / 60) + ' min' : '> 1 h';
+const stWait = (w, lim) => !isFinite(w) || w > lim ? 'bad' : w > lim / 5 ? 'warn' : 'ok';
+function asyncLabel(id) {
+  const tb = (nm, ld, st) => `<div class="tagbox"><span class="nm">${nm}</span><span class="ld st-${st}">${ld}</span></div>`;
+  if (id === 'q0') return tb('Queue', fmt(QS.main) + ' · ' + fmtWait(QS.wait), stWait(QS.wait, 10));
+  if (id === 'wk0') return tb('Workers ×' + SS[step].workers, pct(loads.wk0 || 0), stOf(loads.wk0 || 0));
+  const c = kindOf(id);
+  return tb(CHN[c], fmtWait(QS.cw[c]), stWait(QS.cw[c], 60));
+}
 function updateLabelText() {
   for (const n of nodes.values()) {
     if (!n.spec) continue;
     let html;
     if (n.id === 'users') html = `<div class="tagbox"><span class="nm">Fans</span><span class="ld">${fmt(U)}</span></div>`;
+    else if (isAsync(n.id)) html = asyncLabel(n.id);
     else if (n.id === 'dns') html = `<div class="tagbox"><span class="nm">${n.spec.label}</span></div>`;
     else {
       let L = loads[n.id];
@@ -1445,23 +1613,27 @@ function legendFor(k) {
   if (k <= 4) return it('var(--ink)', 'Requête') + it('var(--red)', 'Perdue');
   if (k === 5) return it('var(--ink)', 'Requête') + it('var(--blue)', 'Question au DNS') + it('var(--red)', 'Perdue');
   if (k === 8) return it('#1E8F5A', 'Fichier servi par le CDN') + it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--red)', 'Perdue');
+  if (k === 11) return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Réservation') + it('var(--hatch)', 'Synchro') + it('var(--red)', 'Perdue');
+  if (k === 12) return it('var(--ink)', 'Réservation') + it('#7A4BD6', 'Notification') + it('var(--blue)', 'Lecture') + it('var(--red)', 'Perdue');
   if (k === 10) return it('var(--blue)', 'Fan') + it('#E8A900', 'Bot') + it('var(--hatch)', 'Bloqué · 429') + it('var(--red)', 'Perdue');
   return it('var(--blue)', 'Lecture') + it('var(--ink)', 'Écriture') + it('var(--hatch)', 'Synchro') + it('var(--red)', 'Perdue');
 }
 function fillRange(r) { r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); }
-const mtr = { p50: $('#mP50'), p99: $('#mP99'), err: $('#mErr'), spark: $('#spark'), scn: $('#scnState'), blk: $('#mBlk'), blkWrap: $('#mBlkWrap') };
+const mtr = { q: $('#qline'), p50: $('#mP50'), p99: $('#mP99'), err: $('#mErr'), spark: $('#spark'), scn: $('#scnState'), blk: $('#mBlk'), blkWrap: $('#mBlkWrap') };
 const fmtMs = ms => ms >= TIMEOUT * 1000 - 1 ? '> 2 s' : ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 const fmtErr = e => e < 0.0005 ? '0 %' : e < 0.1 ? (e * 100).toFixed(1).replace('.', ',') + ' %' : Math.round(e * 100) + ' %';
 function updateU() { U = Math.max(1, Math.min(U_MAX, Ubase * scnMult(SCN.mode, SCN.t))); }
 let liveAcc = 0;
 function advanceSim(dt) {
   if (CH.warm < 1) CH.warm = Math.min(1, CH.warm + dt / 15);
+  if (CH.peak > 0) { CH.peak = Math.max(0, CH.peak - dt); if (!CH.peak) syncControls(); }
   if (SCN.mode !== 'manual') {
     SCN.t += dt;
     if (SCN.mode === 'rush' && SCN.t > RUSH_END) { SCN.mode = 'manual'; SCN.t = 0; syncSim(); }
   }
   updateU();
   computeLoads();
+  asyncStep(dt);
   simStep(dt);
   liveAcc += dt;
   if (liveAcc >= 0.25) { liveAcc = 0; liveUpdate(); }
@@ -1485,10 +1657,12 @@ function liveUpdate() {
   hud.usersOut.textContent = fmt(U);
   const off = SIM.err >= 0.995 && !isFinite(top.load);
   const st = off || SIM.err >= 0.02 ? 'bad' : (SIM.err > 0.001 || SIM.p99 >= 800 || top.load >= 0.7) ? 'warn' : 'ok';
-  const txt = off ? 'Hors ligne' : st === 'bad' ? (top.load >= 1 ? 'Saturé<span class="long"> · requêtes perdues</span>' : 'Requêtes perdues') : st === 'warn' ? 'Ça ralentit' : 'Ça tient';
-  const vh = MK(st) + `<span>${txt}</span>`;
+  let late = false;
+  if (st === 'ok' && step >= 11 && SS[step].mode === 'queue') { const cmax = step === 12 ? Math.max(QS.cw.mail, QS.cw.sms, QS.cw.push) : 0; late = QS.wait > 10 || cmax > 60; }
+  const txt = late ? 'Ça tient<span class="long"> · confirmations en retard</span>' : off ? 'Hors ligne' : st === 'bad' ? (top.load >= 1 ? 'Saturé<span class="long"> · requêtes perdues</span>' : 'Requêtes perdues') : st === 'warn' ? 'Ça ralentit' : 'Ça tient';
+  const vh = MK(late ? 'warn' : st) + `<span>${txt}</span>`;
   if (hud.verdict.dataset.h !== vh) { hud.verdict.innerHTML = vh; hud.verdict.dataset.h = vh; }
-  hud.verdict.className = 'verdict st-' + st;
+  hud.verdict.className = 'verdict st-' + (late ? 'warn' : st);
   let bn;
   if (step === 0 && SS[0].closed) bn = 'Le laptop est fermé';
   else if (!isFinite(top.load)) bn = 'Hors service : ' + neckNameFor(step, top.id);
@@ -1500,6 +1674,14 @@ function liveUpdate() {
   mtr.err.textContent = fmtErr(SIM.err);
   mtr.err.className = SIM.err >= 0.02 ? 'st-bad' : '';
   mtr.scn.textContent = scnLabel();
+  const qm = step >= 11 && SS[step].mode === 'queue';
+  mtr.q.hidden = !qm;
+  if (qm) {
+    let t = step === 12
+      ? Object.keys(CHN).map(c => `${CHN[c]} <b>${fmtWait(QS.cw[c])}</b>`).join(' · ')
+      : `Queue <b>${fmt(QS.main)}</b> · attente <b>${fmtWait(QS.wait)}</b> · DLQ <b>${fmt(QS.dlq)}</b>`;
+    if (mtr.q.dataset.h !== t) { mtr.q.innerHTML = t; mtr.q.dataset.h = t; }
+  }
   mtr.blkWrap.hidden = step !== 10;
   if (step === 10) mtr.blk.textContent = fmtErr(BLOCKED);
   if (step === 9) $('#flushHint').textContent = CH.warm < 1 ? 'Cache rempli à ' + Math.round(CH.warm * 100) + ' % : les réplicas encaissent les lectures ratées.' : 'Cache chaud.';
@@ -1538,7 +1720,7 @@ function goTo(k, opts = {}) {
   step = k;
   if (changed || opts.force) {
     Ubase = STEPS[k].u; hud.users.value = sliderFromU(Ubase); rrCounter = 0;
-    CH.app = CH.lb = CH.db = false; CH.warm = 1; SIM.q = {}; SIM.drop = {};
+    CH.app = CH.lb = CH.db = false; CH.warm = 1; CH.peak = 0; SIM.q = {}; SIM.drop = {}; resetQueues();
     if (gl) clearParticles();
   }
   $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === k));
@@ -1555,7 +1737,7 @@ function goTo(k, opts = {}) {
 /* ---------- Contrôles ---------- */
 function syncControls() {
   $$('.seg[data-step]').forEach(seg => { const k = +seg.dataset.step, key = seg.dataset.key; seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(String(SS[k][key]) === b.dataset.val))); });
-  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = ['write', 'cdn', 'hit'].includes(key) ? SS[k][key] + ' %' : key === 'bots' ? '×' + SS[k][key] : SS[k][key]; });
+  $$('input[type=range][data-step]').forEach(r => { const k = +r.dataset.step, key = r.dataset.key; r.value = SS[k][key]; const o = document.querySelector(`[data-out="${k}-${key}"]`); if (o) o.textContent = ['write', 'cdn', 'hit', 'fail'].includes(key) ? SS[k][key] + ' %' : key === 'sms' ? SS[k][key] + '/s' : ['write'].includes(key) ? SS[k][key] + ' %' : key === 'bots' ? '×' + SS[k][key] : SS[k][key]; });
   $$('input[type=range]').forEach(fillRange);
   const c = CORES[SS[2].cores];
   $('#coreReadout').textContent = `${SS[2].cores} cœurs · ${c.ram} de RAM · environ ${fmt(c.price)} € · tient ${fmt(c.cap)} fans`;
@@ -1567,6 +1749,16 @@ function syncControls() {
     : 'Les données sont découpées : fans 1 à 500 sur une base, 501 à 1000 sur l\'autre. Les shards ne se parlent pas : 10 shards, environ 10 fois plus de clients.').replace(/ :/g, ' :');
   const lh = { none: 'Aucune limite : chaque requête de bot arrive jusqu\'aux serveurs.', '100': '100 requêtes par minute et par IP : 90 % du trafic des bots est refusé, aucun fan n\'est gêné.', '20': '20 par minute : 98 % des bots refusés, 1 % des fans qui rafraîchissent vite reçoivent un 429.', '5': '5 par minute : presque tous les bots refusés, mais 15 % des vrais fans aussi. Trop strict.' };
   $('#limitHint').textContent = lh[SS[10].limit];
+  $('#queueHint').textContent = SS[11].mode === 'sync'
+    ? 'Synchrone : chaque réservation écrit dans le primaire pendant que le fan attend. Au-delà de 2 000 par seconde, le primaire sature et les paiements échouent.'
+    : 'Via une queue : le fan reçoit « réservation reçue » tout de suite. ' + SS[11].workers + ' workers vident la queue à ' + fmt(SS[11].workers * WRK) + ' réservations par seconde.';
+  $('#fanHint').textContent = SS[12].fan === 'shared'
+    ? 'Une seule queue : les messages sortent dans l\'ordre. Quand le SMS bloque, l\'email et le push attendent derrière lui.'
+    : 'Une queue par canal : chaque canal avance à son rythme. Un SMS lent ne retarde plus le billet par email.';
+  $('#peakBtn').disabled = CH.peak > 0;
+  $('#peakBtn').textContent = CH.peak > 0 ? 'Pic en cours : réservations ×3' : 'Lancer un pic de réservations (10 s)';
+  $('#smsDownBtn').textContent = SS[12].smsDown ? 'Rétablir le fournisseur SMS' : 'Couper le fournisseur SMS';
+  $('#smsDownBtn').setAttribute('aria-pressed', String(!!SS[12].smsDown));
   const lid = SS[0].closed;
   $('#lidBtn').textContent = lid ? 'Rouvrir le laptop' : 'Fermer le laptop';
   $('#lidHint').textContent = lid ? 'Site hors ligne : toutes les requêtes échouent.'.replace(' :', ' :') : 'Le site répond.';
@@ -1583,6 +1775,8 @@ document.addEventListener('input', e => {
 });
 $('#lidBtn').addEventListener('click', () => { SS[0].closed = !SS[0].closed; if (step !== 0) goTo(0); else refresh(); });
 hud.users.addEventListener('input', () => { Ubase = uFromSlider(+hud.users.value); updateU(); computeLoads(); liveUpdate(); });
+$('#peakBtn').addEventListener('click', () => { if (step !== 11) goTo(11, { scroll: true }); CH.peak = 10; syncControls(); computeLoads(); liveUpdate(); });
+$('#smsDownBtn').addEventListener('click', () => { SS[12].smsDown = !SS[12].smsDown; if (step !== 12) goTo(12, { scroll: true }); else refresh(); });
 $('#flushBtn').addEventListener('click', () => { if (step !== 9) goTo(9, { scroll: true }); CH.warm = 0; computeLoads(); liveUpdate(); });
 $('#scnSeg').addEventListener('click', e => {
   const b = e.target.closest('button[data-scn]'); if (!b) return;
