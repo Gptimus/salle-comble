@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://gptimus.github.io/salle-comble/sitemap.xml

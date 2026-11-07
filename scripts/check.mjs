@@ -1,9 +1,10 @@
 // Static checks on the built page, run before the browser tests.
 import { existsSync, readFileSync } from 'node:fs';
+import { render } from './site.mjs';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 
-const html = readFileSync('dist/index.html', 'utf8');
+const html = readFileSync('index.html', 'utf8');
 const errors = [];
 const fail = (msg) => errors.push(msg);
 
@@ -82,7 +83,18 @@ for (const [, id] of html.matchAll(/\$\('#([\w-]+)'\)/g)) {
 for (const needle of ['<link rel="canonical"', 'property="og:image"', 'application/ld+json', 'name="description"']) {
   if (!html.includes(needle)) fail(`missing ${needle}`);
 }
-for (const f of ['dist/og.png', 'dist/robots.txt', 'dist/sitemap.xml']) if (!existsSync(f)) fail(`missing ${f}`);
+for (const f of ['og.png', 'robots.txt', 'sitemap.xml', '.nojekyll']) if (!existsSync(f)) fail(`missing ${f}`);
+
+// 7. The published root matches src/: GitHub Pages serves these files as committed.
+const stamp = html.match(/<!-- build \w+ · ([\d-]+) -->/);
+if (!stamp) fail('index.html has no build stamp: run npm run build');
+else {
+  for (const [path, want] of Object.entries(render(stamp[1]))) {
+    if (!existsSync(path) || !readFileSync(path).equals(Buffer.from(want))) {
+      fail(`${path} is out of date with src/: run npm run build and commit the result`);
+    }
+  }
+}
 
 if (errors.length) {
   console.error(`✗ ${errors.length} problem(s):\n- ` + errors.join('\n- '));
